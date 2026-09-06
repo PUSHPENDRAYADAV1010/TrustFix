@@ -10,7 +10,7 @@ import { Modal } from '../../components/common/Modal';
 import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
 import { LoadingSpinner, EmptyState } from '../../components/common/FeedbackStates';
-import { formatCurrency, formatDate } from '../../utils/formatters';
+import { formatCurrency, formatDate, formatLocalDate } from '../../utils/formatters';
 import { resolveServiceImage } from '../../utils/imageResolver';
 import {
   Wrench,
@@ -54,7 +54,7 @@ export const BookServicePage = () => {
     if (initialDate) return initialDate;
     const d = new Date();
     d.setDate(d.getDate() + 1);
-    return d.toISOString().split('T')[0];
+    return formatLocalDate(d);
   });
   const [selectedTime, setSelectedTime] = useState('10:00 AM - 12:00 PM');
   const [selectedAddressId, setSelectedAddressId] = useState('');
@@ -543,7 +543,7 @@ export const BookServicePage = () => {
                     className="form-control"
                     value={selectedDate}
                     onChange={(e) => setSelectedDate(e.target.value)}
-                    min={new Date().toISOString().split('T')[0]}
+                    min={formatLocalDate(new Date())}
                     required
                   />
                 </div>

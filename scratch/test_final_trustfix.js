@@ -267,10 +267,17 @@ async function runAllTests() {
   // 15. Admin Login
   console.log('\n[Point 15] Testing Admin Login...');
   try {
-    const r = await request(`${BASE_URL}/auth/login`, {
+    const adminEmail = process.env.ADMIN_EMAIL || 'pushpendraydv1010@gmail.com';
+    let r = await request(`${BASE_URL}/auth/login`, {
       method: 'POST',
-      body: { email: 'admin@trustfix.com', password: 'Admin@123' },
+      body: { email: adminEmail, password: 'Admin@123' },
     });
+    if (!r.ok) {
+      r = await request(`${BASE_URL}/auth/login`, {
+        method: 'POST',
+        body: { email: 'admin@trustfix.com', password: 'Admin@123' },
+      });
+    }
     assert(r.ok && r.data.role === 'ADMIN' && r.data.message, `Admin logged in successfully (${r.data.email})`);
     adminToken = r.data.message;
     adminUserId = r.data.userId;

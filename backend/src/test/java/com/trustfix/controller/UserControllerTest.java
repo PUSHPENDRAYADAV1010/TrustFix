@@ -5,8 +5,6 @@ import com.trustfix.entity.User;
 import com.trustfix.entity.UserRole;
 import com.trustfix.exception.ResourceAlreadyExistsException;
 import com.trustfix.exception.ResourceNotFoundException;
-import com.trustfix.repository.UserRepository;
-import com.trustfix.security.JwtService;
 import com.trustfix.dto.mapper.UserMapper;
 import com.trustfix.repository.UserRepository;
 import com.trustfix.security.JwtService;

@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trustfix.entity.Address;
 import com.trustfix.entity.User;
 import com.trustfix.exception.ResourceNotFoundException;
-import com.trustfix.repository.UserRepository;
-import com.trustfix.security.JwtService;
 import com.trustfix.dto.mapper.AddressMapper;
 import com.trustfix.repository.UserRepository;
 import com.trustfix.security.JwtService;

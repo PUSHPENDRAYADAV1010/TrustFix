@@ -8,8 +8,6 @@ import com.trustfix.entity.User;
 import com.trustfix.exception.BadRequestException;
 import com.trustfix.exception.ResourceAlreadyExistsException;
 import com.trustfix.exception.ResourceNotFoundException;
-import com.trustfix.repository.UserRepository;
-import com.trustfix.security.JwtService;
 import com.trustfix.dto.mapper.ReviewMapper;
 import com.trustfix.repository.UserRepository;
 import com.trustfix.security.JwtService;

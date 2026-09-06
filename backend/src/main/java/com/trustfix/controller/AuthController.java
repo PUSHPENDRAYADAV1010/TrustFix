@@ -56,7 +56,7 @@ public class AuthController {
 
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() ->
-                        new RuntimeException("User not found"));
+                        new com.trustfix.exception.ResourceNotFoundException("User not found with email: " + request.getEmail()));
 
         AuthResponse response = new AuthResponse(
                 token,

@@ -10,8 +10,6 @@ import com.trustfix.entity.Service;
 import com.trustfix.entity.User;
 import com.trustfix.exception.BadRequestException;
 import com.trustfix.exception.ResourceNotFoundException;
-import com.trustfix.repository.UserRepository;
-import com.trustfix.security.JwtService;
 import com.trustfix.dto.mapper.BookingMapper;
 import com.trustfix.repository.UserRepository;
 import com.trustfix.security.JwtService;

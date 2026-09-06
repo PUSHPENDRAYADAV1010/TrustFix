@@ -1,4 +1,5 @@
 import apiClient from './api';
+import { formatLocalDate } from '../utils/formatters';
 
 const formatToTime = (timeStr) => {
   if (!timeStr) return '10:00:00';
@@ -34,7 +35,7 @@ const mapBookingResponse = (b) => {
       city: b.city || 'Mumbai',
       pincode: b.postalCode || '400001',
     },
-    date: b.bookingDate || new Date().toISOString().split('T')[0],
+    date: b.bookingDate || formatLocalDate(new Date()),
     time: b.bookingTime ? String(b.bookingTime).slice(0, 5) : '10:00',
     status: b.status || 'PENDING',
     price: b.totalAmount || 0,
@@ -79,7 +80,7 @@ export const bookingService = {
         serviceId: Number(serviceId),
         addressId: Number(addressId),
         providerId: providerId ? Number(providerId) : undefined,
-        bookingDate: bookingData.date || new Date().toISOString().split('T')[0],
+        bookingDate: bookingData.date || formatLocalDate(new Date()),
         bookingTime: formatToTime(bookingData.time),
         totalAmount: bookingData.price || bookingData.totalAmount || undefined,
         notes: bookingData.description || bookingData.notes || 'Service appointment requested',

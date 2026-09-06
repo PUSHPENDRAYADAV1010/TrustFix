@@ -5,7 +5,7 @@ import { providerService } from '../../services/providerService';
 import { RatingStars } from '../../components/common/RatingStars';
 import { ProviderCard } from '../../components/provider/ProviderCard';
 import { LoadingSpinner, ErrorMessage } from '../../components/common/FeedbackStates';
-import { formatCurrency } from '../../utils/formatters';
+import { formatCurrency, formatLocalDate } from '../../utils/formatters';
 import { resolveServiceImage } from '../../utils/imageResolver';
 import { ShieldCheck, Clock, CheckCircle2, Info, ArrowRight, ChevronRight, Calendar, UserCheck, Shield } from 'lucide-react';
 
@@ -17,7 +17,7 @@ export const ServiceDetailsPage = () => {
   const [selectedDate, setSelectedDate] = useState(() => {
     const today = new Date();
     today.setDate(today.getDate() + 1);
-    return today.toISOString().split('T')[0];
+    return formatLocalDate(today);
   });
   const [selectedTime, setSelectedTime] = useState('10:00 AM - 12:00 PM');
   const [loading, setLoading] = useState(true);
@@ -266,6 +266,7 @@ export const ServiceDetailsPage = () => {
                     className="form-control"
                     value={selectedDate}
                     onChange={(e) => setSelectedDate(e.target.value)}
+                    min={formatLocalDate(new Date())}
                     required
                   />
                 </div>

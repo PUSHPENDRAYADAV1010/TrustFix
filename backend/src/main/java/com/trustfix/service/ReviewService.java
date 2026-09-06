@@ -38,6 +38,9 @@ public class ReviewService {
     }
 
     public Review createReview(Long bookingId, Integer rating, String comment) {
+        if (bookingId == null) {
+            throw new BadRequestException("Booking ID is required to submit a review");
+        }
         User authenticatedUser = securityUtil.getAuthenticatedUser();
 
         if (rating == null || rating < 1 || rating > 5) {
