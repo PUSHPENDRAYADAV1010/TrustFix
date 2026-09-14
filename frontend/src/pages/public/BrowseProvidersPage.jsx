@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { providerService } from '../../services/providerService';
 import { locationService } from '../../services/locationService';
@@ -6,6 +6,12 @@ import { categoryService } from '../../services/categoryService';
 import { ProviderCard } from '../../components/provider/ProviderCard';
 import { MapView } from '../../components/map/MapView';
 import { LoadingSpinner, EmptyState } from '../../components/common/FeedbackStates';
+import {
+  DEFAULT_CUSTOMER_LOCATION,
+  POPULAR_LOCATIONS,
+  calculateDistance,
+  formatDistance
+} from '../../utils/distance';
 import {
   Columns,
   List,
@@ -18,28 +24,44 @@ import {
   Star,
   CheckCircle2,
   ArrowUpDown,
+  Navigation,
+  Info,
+  Sparkles,
+  Filter
 } from 'lucide-react';
 
 export const BrowseProvidersPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialCategory = searchParams.get('category') || '';
   const initialSearch = searchParams.get('search') || '';
+  const initialLocation = searchParams.get('location') || '';
+  const initialRadius = searchParams.get('radius') || '25';
 
   const [categories, setCategories] = useState([]);
   const [providers, setProviders] = useState([]);
   const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Location & Radius State
+  const [customerLocation, setCustomerLocation] = useState(() => {
+    if (initialLocation) {
+      const match = POPULAR_LOCATIONS.find(l => l.name.toLowerCase().includes(initialLocation.toLowerCase()) || l.city.toLowerCase().includes(initialLocation.toLowerCase()));
+      if (match) return match;
+    }
+    return DEFAULT_CUSTOMER_LOCATION;
+  });
+  const [customLocationText, setCustomLocationText] = useState(initialLocation || DEFAULT_CUSTOMER_LOCATION.name);
+  const [distanceRadius, setDistanceRadius] = useState(initialRadius); // km
+  const [restrictToRadius, setRestrictToRadius] = useState(false); // DEFAULT FALSE: nearby is recommendation, not restriction!
+
   // Filters State
-  const [searchService, setSearchService] = useState(initialSearch);
-  const [searchLocation, setSearchLocation] = useState('');
+  const [searchKeyword, setSearchKeyword] = useState(initialSearch);
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [minRating, setMinRating] = useState('0');
   const [maxPrice, setMaxPrice] = useState('2000');
-  const [distanceRadius, setDistanceRadius] = useState('25');
   const [onlyAvailable, setOnlyAvailable] = useState(false);
   const [verifiedOnly, setVerifiedOnly] = useState(true);
-  const [sortBy, setSortBy] = useState('rating'); // 'rating' | 'price_asc' | 'price_desc' | 'experience'
+  const [sortBy, setSortBy] = useState('recommended'); // 'recommended' | 'distance' | 'rating' | 'price_asc' | 'experience'
 
   // View Mode State
   const [viewMode, setViewMode] = useState('split'); // 'split' | 'list' | 'map'
@@ -57,11 +79,9 @@ export const BrowseProvidersPage = () => {
     const fetchProvidersAndLocations = async () => {
       setLoading(true);
       try {
-        const combinedSearch = [searchService, searchLocation].filter(Boolean).join(' ');
-
         const [provs, locs] = await Promise.all([
           providerService.getProviders({
-            search: combinedSearch,
+            search: searchKeyword,
             category: selectedCategory,
             minRating: Number(minRating) > 0 ? minRating : undefined,
             maxPrice: Number(maxPrice) < 2000 ? maxPrice : undefined,
@@ -71,23 +91,11 @@ export const BrowseProvidersPage = () => {
           locationService.getProviderLocations({
             service: selectedCategory,
             verifiedOnly,
-            search: combinedSearch,
+            search: searchKeyword,
           })
         ]);
 
-        // Client-side sorting
-        let sorted = [...provs];
-        if (sortBy === 'rating') {
-          sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-        } else if (sortBy === 'price_asc') {
-          sorted.sort((a, b) => (a.startingPrice || 0) - (b.startingPrice || 0));
-        } else if (sortBy === 'price_desc') {
-          sorted.sort((a, b) => (b.startingPrice || 0) - (a.startingPrice || 0));
-        } else if (sortBy === 'experience') {
-          sorted.sort((a, b) => (b.experience || 0) - (a.experience || 0));
-        }
-
-        setProviders(sorted);
+        setProviders(provs);
         setLocations(locs);
       } finally {
         setLoading(false);
@@ -95,18 +103,77 @@ export const BrowseProvidersPage = () => {
     };
 
     fetchProvidersAndLocations();
-  }, [searchService, searchLocation, selectedCategory, minRating, maxPrice, distanceRadius, onlyAvailable, verifiedOnly, sortBy]);
+  }, [searchKeyword, selectedCategory, minRating, maxPrice, onlyAvailable, verifiedOnly]);
+
+  // Compute distances & sort providers
+  const processedProviders = useMemo(() => {
+    const radiusNum = Number(distanceRadius) || 25;
+
+    // Attach calculated distance to each provider
+    let list = providers.map((p) => {
+      const dist = (customerLocation?.latitude && p.latitude)
+        ? calculateDistance(customerLocation.latitude, customerLocation.longitude, p.latitude, p.longitude)
+        : (p.distanceKm || 5);
+
+      const isWithin = dist !== null ? dist <= radiusNum : true;
+      return {
+        ...p,
+        computedDistance: dist,
+        isWithinRadius: isWithin
+      };
+    });
+
+    // If user explicitly asked to restrict to radius
+    if (restrictToRadius) {
+      list = list.filter(p => p.isWithinRadius);
+    }
+
+    // Sort
+    list.sort((a, b) => {
+      if (sortBy === 'recommended') {
+        // Recommended within radius first, then by rating
+        if (a.isWithinRadius !== b.isWithinRadius) {
+          return a.isWithinRadius ? -1 : 1;
+        }
+        return (b.rating || 0) - (a.rating || 0);
+      } else if (sortBy === 'distance') {
+        return (a.computedDistance || 999) - (b.computedDistance || 999);
+      } else if (sortBy === 'rating') {
+        return (b.rating || 0) - (a.rating || 0);
+      } else if (sortBy === 'price_asc') {
+        return (a.startingPrice || 0) - (b.startingPrice || 0);
+      } else if (sortBy === 'experience') {
+        return (b.experience || 0) - (a.experience || 0);
+      }
+      return 0;
+    });
+
+    return list;
+  }, [providers, customerLocation, distanceRadius, restrictToRadius, sortBy]);
+
+  const nearbyCount = processedProviders.filter(p => p.isWithinRadius).length;
+  const outsideCount = processedProviders.filter(p => !p.isWithinRadius).length;
+
+  const handleLocationPresetChange = (locName) => {
+    const match = POPULAR_LOCATIONS.find(l => l.name === locName);
+    if (match) {
+      setCustomerLocation(match);
+      setCustomLocationText(match.name);
+    }
+  };
 
   const handleClearFilters = () => {
-    setSearchService('');
-    setSearchLocation('');
+    setSearchKeyword('');
     setSelectedCategory('');
     setMinRating('0');
     setMaxPrice('2000');
     setDistanceRadius('25');
+    setRestrictToRadius(false);
     setOnlyAvailable(false);
     setVerifiedOnly(true);
-    setSortBy('rating');
+    setSortBy('recommended');
+    setCustomerLocation(DEFAULT_CUSTOMER_LOCATION);
+    setCustomLocationText(DEFAULT_CUSTOMER_LOCATION.name);
     setSearchParams({});
   };
 
@@ -114,22 +181,30 @@ export const BrowseProvidersPage = () => {
     <div className="browse-page" style={{ padding: '2rem 0 3.5rem 0' }}>
       <div className="container">
         
-        {/* Header */}
+        {/* Page Header */}
         <div className="mb-6">
-          <span className="section-subtitle">Verified Service Directory</span>
-          <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--neutral-900)', margin: '0 0 4px 0' }}>
-            Find Trusted Professionals Near You
+          <span className="section-subtitle">Verified Trade Network & Marketplace</span>
+          <h1 style={{ fontSize: '2.1rem', fontWeight: 800, color: 'var(--neutral-900)', margin: '0 0 4px 0' }}>
+            Find Verified Professionals
           </h1>
           <p className="text-sm text-muted">
-            Verified service providers near your location with background checks and upfront rates.
+            Discover verified electricians, plumbers, and technicians with transparent rate cards, background checks, and real customer reviews.
           </p>
         </div>
 
-        {/* Top Dual Search Toolbar: What service? Where? */}
-        <div className="card mb-6" style={{ padding: '1rem 1.25rem', backgroundColor: 'var(--white)' }}>
+        {/* Location & Radius Control Bar */}
+        <div
+          className="card mb-6"
+          style={{
+            padding: '1.25rem',
+            backgroundColor: 'var(--white)',
+            border: '1px solid var(--neutral-200)',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
+          }}
+        >
           <div className="flex flex-wrap items-center gap-3">
-            {/* What service input */}
-            <div style={{ flex: '1 1 260px', position: 'relative' }}>
+            {/* Search Keyword */}
+            <div style={{ flex: '1 1 240px', position: 'relative' }}>
               <div style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--neutral-400)', display: 'flex', alignItems: 'center' }}>
                 <Search size={16} />
               </div>
@@ -137,48 +212,94 @@ export const BrowseProvidersPage = () => {
                 type="text"
                 className="form-control"
                 style={{ paddingLeft: '36px' }}
-                placeholder="What service? (e.g. Electrician, AC Repair)"
-                value={searchService}
-                onChange={(e) => setSearchService(e.target.value)}
+                placeholder="Search name, trade, or skill (e.g. Electrician, MCB, Leak Fix)"
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
               />
             </div>
 
-            {/* Where input */}
-            <div style={{ flex: '1 1 220px', position: 'relative' }}>
-              <div style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--neutral-400)', display: 'flex', alignItems: 'center' }}>
+            {/* Customer Location Selector */}
+            <div style={{ flex: '1 1 240px', position: 'relative' }}>
+              <div style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary-700)', display: 'flex', alignItems: 'center' }}>
                 <MapPin size={16} />
               </div>
-              <input
-                type="text"
+              <select
                 className="form-control"
-                style={{ paddingLeft: '36px' }}
-                placeholder="Where? (e.g. Mumbai, Thane, Andheri)"
-                value={searchLocation}
-                onChange={(e) => setSearchLocation(e.target.value)}
-              />
+                style={{ paddingLeft: '36px', fontWeight: 600 }}
+                value={customerLocation.name}
+                onChange={(e) => handleLocationPresetChange(e.target.value)}
+              >
+                {POPULAR_LOCATIONS.map((loc) => (
+                  <option key={loc.name} value={loc.name}>
+                    📍 {loc.name}
+                  </option>
+                ))}
+              </select>
             </div>
 
-            <button
-              type="button"
-              className="btn btn-primary"
-              style={{ padding: '0.625rem 1.25rem' }}
-            >
-              <span>Search</span>
-            </button>
+            {/* Radius Selector */}
+            <div style={{ flex: '0 1 180px' }}>
+              <select
+                className="form-control"
+                style={{ fontWeight: 600 }}
+                value={distanceRadius}
+                onChange={(e) => setDistanceRadius(e.target.value)}
+              >
+                <option value="2">Radius: 2 km (Hyperlocal)</option>
+                <option value="5">Radius: 5 km (Neighborhood)</option>
+                <option value="10">Radius: 10 km (Suburban)</option>
+                <option value="25">Radius: 25 km (Metro Area)</option>
+                <option value="50">Radius: 50 km (Any Distance)</option>
+              </select>
+            </div>
 
             <button
               type="button"
               className="btn btn-light text-xs flex items-center gap-1"
               onClick={handleClearFilters}
-              title="Reset all search & filter options"
+              title="Reset search & filters"
             >
               <RotateCcw size={13} />
               <span>Reset</span>
             </button>
           </div>
+
+          {/* CRUCIAL RULE CALLOUT BANNER */}
+          <div
+            style={{
+              marginTop: '1rem',
+              padding: '0.75rem 1rem',
+              backgroundColor: 'rgba(37, 99, 235, 0.07)',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid rgba(37, 99, 235, 0.2)',
+              fontSize: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '8px',
+              color: 'var(--primary-900)'
+            }}
+          >
+            <div className="flex items-center gap-2">
+              <Sparkles size={16} color="var(--primary-700)" style={{ flexShrink: 0 }} />
+              <span>
+                <strong>Provider Selection Rule:</strong> Nearby providers within <strong>{distanceRadius} km</strong> are recommended for fast response, but <strong>NOT a restriction</strong>. You can select and book any verified specialist across the platform!
+              </span>
+            </div>
+
+            <label className="flex items-center gap-2 font-semibold cursor-pointer text-xs" style={{ color: 'var(--neutral-800)' }}>
+              <input
+                type="checkbox"
+                checked={restrictToRadius}
+                onChange={(e) => setRestrictToRadius(e.target.checked)}
+              />
+              <span>Show only within {distanceRadius} km</span>
+            </label>
+          </div>
         </div>
 
-        {/* Main Content: Left Filter Sidebar + Right Results */}
+        {/* Main 2-Column Layout */}
         <div
           style={{
             display: 'grid',
@@ -205,17 +326,17 @@ export const BrowseProvidersPage = () => {
             </div>
 
             <div className="flex flex-col gap-5">
-              {/* Service Type */}
+              {/* Category Filter */}
               <div className="form-group mb-0">
-                <label className="form-label" style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--neutral-500)' }}>
-                  Service Type
+                <label className="form-label text-xs uppercase text-muted font-bold" style={{ letterSpacing: '0.04em' }}>
+                  Trade Category
                 </label>
                 <select
                   className="form-control"
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
                 >
-                  <option value="">All Service Categories</option>
+                  <option value="">All Trade Categories</option>
                   {categories.map((c) => (
                     <option key={c.id} value={c.name}>{c.name}</option>
                   ))}
@@ -224,7 +345,7 @@ export const BrowseProvidersPage = () => {
 
               {/* Minimum Rating */}
               <div className="form-group mb-0">
-                <label className="form-label" style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--neutral-500)' }}>
+                <label className="form-label text-xs uppercase text-muted font-bold" style={{ letterSpacing: '0.04em' }}>
                   Minimum Rating
                 </label>
                 <div className="flex flex-col gap-1.5 text-xs">
@@ -262,28 +383,11 @@ export const BrowseProvidersPage = () => {
                 </div>
               </div>
 
-              {/* Distance Radius */}
-              <div className="form-group mb-0">
-                <label className="form-label" style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--neutral-500)' }}>
-                  Distance Range
-                </label>
-                <select
-                  className="form-control"
-                  value={distanceRadius}
-                  onChange={(e) => setDistanceRadius(e.target.value)}
-                >
-                  <option value="2">Within 2 km</option>
-                  <option value="5">Within 5 km</option>
-                  <option value="10">Within 10 km</option>
-                  <option value="25">Within 25 km (Metro Area)</option>
-                </select>
-              </div>
-
-              {/* Price Range Slider */}
+              {/* Price Range */}
               <div className="form-group mb-0">
                 <div className="flex items-center justify-between mb-1">
-                  <label className="form-label mb-0" style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--neutral-500)' }}>
-                    Max Starting Fee
+                  <label className="form-label mb-0 text-xs uppercase text-muted font-bold" style={{ letterSpacing: '0.04em' }}>
+                    Max Starting Rate
                   </label>
                   <span className="text-xs font-bold text-primary">₹{maxPrice}</span>
                 </div>
@@ -302,7 +406,7 @@ export const BrowseProvidersPage = () => {
                 </div>
               </div>
 
-              {/* Availability Toggle */}
+              {/* Verified & Available Toggles */}
               <div className="flex flex-col gap-2 pt-2 border-top" style={{ borderTop: '1px solid var(--neutral-200)' }}>
                 <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer">
                   <input
@@ -321,7 +425,7 @@ export const BrowseProvidersPage = () => {
                   />
                   <span style={{ color: 'var(--success-700)', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
                     <ShieldCheck size={13} />
-                    Verified Only
+                    Verified Badge Only
                   </span>
                 </label>
               </div>
@@ -330,11 +434,17 @@ export const BrowseProvidersPage = () => {
 
           {/* RIGHT RESULTS AREA */}
           <div>
-            {/* Top Toolbar: Count + Sort + View Toggles */}
-            <div className="flex items-center justify-between flex-wrap gap-3 mb-4 bg-white p-3 rounded-lg border" style={{ backgroundColor: 'var(--white)', border: '1px solid var(--neutral-200)', borderRadius: 'var(--radius-md)' }}>
+            {/* Toolbar: Count + Sort + Views */}
+            <div
+              className="flex items-center justify-between flex-wrap gap-3 mb-4 bg-white p-3 rounded-lg border"
+              style={{ backgroundColor: 'var(--white)', border: '1px solid var(--neutral-200)', borderRadius: 'var(--radius-md)' }}
+            >
               <div>
                 <span className="text-sm font-bold" style={{ color: 'var(--neutral-900)' }}>
-                  {providers.length} professionals found near you
+                  {processedProviders.length} verified professionals found
+                </span>
+                <span className="text-xs text-muted ml-2">
+                  ({nearbyCount} within {distanceRadius} km recommendation)
                 </span>
               </div>
 
@@ -345,18 +455,19 @@ export const BrowseProvidersPage = () => {
                   <span className="text-muted">Sort:</span>
                   <select
                     className="form-control"
-                    style={{ height: '32px', fontSize: '12px', padding: '2px 8px', width: '140px' }}
+                    style={{ height: '32px', fontSize: '12px', padding: '2px 8px', width: '150px' }}
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
                   >
-                    <option value="rating">Best Rated</option>
+                    <option value="recommended">Recommended First</option>
+                    <option value="distance">Nearest Distance</option>
+                    <option value="rating">Highest Rated</option>
                     <option value="price_asc">Price: Low to High</option>
-                    <option value="price_desc">Price: High to Low</option>
-                    <option value="experience">Experience</option>
+                    <option value="experience">Most Experienced</option>
                   </select>
                 </div>
 
-                {/* View Toggles */}
+                {/* View Mode Toggle */}
                 <div className="flex items-center gap-1" style={{ borderLeft: '1px solid var(--neutral-200)', paddingLeft: '8px' }}>
                   <button
                     type="button"
@@ -395,11 +506,11 @@ export const BrowseProvidersPage = () => {
             {/* Content Results */}
             {loading ? (
               <LoadingSpinner message="Locating verified professionals in your area..." />
-            ) : providers.length === 0 ? (
+            ) : processedProviders.length === 0 ? (
               <EmptyState
                 icon={Search}
                 title="No verified providers match your filters"
-                description="Try relaxing your radius, clearing keyword filters, or choosing a different trade category."
+                description="Try expanding your radius, clearing keyword filters, or choosing a different trade category."
                 action={
                   <button className="btn btn-primary" onClick={handleClearFilters}>
                     Reset All Filters
@@ -412,11 +523,13 @@ export const BrowseProvidersPage = () => {
                 {viewMode === 'split' && (
                   <div className="discovery-container split-view">
                     <div className="discovery-list-col flex flex-col gap-4">
-                      {providers.map((p) => (
+                      {processedProviders.map((p) => (
                         <ProviderCard
                           key={p.id}
                           provider={p}
                           isSelected={selectedProviderId === p.id}
+                          customerLocation={customerLocation}
+                          maxRadius={distanceRadius}
                           onSelectOnMap={(id) => setSelectedProviderId(id)}
                         />
                       ))}
@@ -436,10 +549,12 @@ export const BrowseProvidersPage = () => {
                 {/* List View */}
                 {viewMode === 'list' && (
                   <div className="flex flex-col gap-4">
-                    {providers.map((p) => (
+                    {processedProviders.map((p) => (
                       <ProviderCard
                         key={p.id}
                         provider={p}
+                        customerLocation={customerLocation}
+                        maxRadius={distanceRadius}
                         onSelectOnMap={(id) => { setSelectedProviderId(id); setViewMode('split'); }}
                       />
                     ))}

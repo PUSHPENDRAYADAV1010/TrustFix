@@ -316,41 +316,83 @@ export const RegisterPage = () => {
                 <div
                   style={{
                     backgroundColor: 'var(--primary-50)',
-                    border: '1px solid var(--primary-100)',
+                    border: '1px solid var(--primary-200)',
                     borderRadius: 'var(--radius-md)',
-                    padding: '1rem',
-                    marginBottom: '1rem',
+                    padding: '1.25rem',
+                    marginBottom: '1.25rem',
                   }}
                 >
-                  <div className="form-group mb-3">
-                    <label className="form-label">Primary Trade Specialization</label>
-                    <select
-                      name="service"
-                      className="form-control"
-                      value={formData.service}
-                      onChange={handleChange}
-                    >
-                      {categories.map(c => (
-                        <option key={c.id} value={c.name}>{c.name}</option>
-                      ))}
-                    </select>
+                  <div className="flex items-center gap-1.5 mb-3 text-xs font-bold text-primary uppercase" style={{ letterSpacing: '0.04em' }}>
+                    <Briefcase size={14} />
+                    <span>Professional Trade & Verification Details</span>
                   </div>
 
-                  <div className="form-group mb-0">
-                    <label className="form-label">Primary Service Area</label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div className="form-group mb-0">
+                      <label className="form-label text-xs font-semibold">Primary Trade</label>
+                      <select
+                        name="service"
+                        className="form-control"
+                        value={formData.service}
+                        onChange={handleChange}
+                      >
+                        {categories.map(c => (
+                          <option key={c.id} value={c.name}>{c.name}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="form-group mb-0">
+                      <label className="form-label text-xs font-semibold">Years of Experience</label>
+                      <select
+                        name="experience"
+                        className="form-control"
+                        defaultValue="5"
+                      >
+                        <option value="1">1-2 Years</option>
+                        <option value="3">3-5 Years</option>
+                        <option value="6">6-10 Years</option>
+                        <option value="10">10+ Years (Master)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="form-group mb-3">
+                    <label className="form-label text-xs font-semibold">Primary Service Coverage Area</label>
                     <input
                       type="text"
                       name="serviceArea"
                       className="form-control"
-                      placeholder="e.g. Mumbai, Thane, Navi Mumbai"
+                      placeholder="e.g. Thane, Mulund, Mumbai Western Suburbs"
                       value={formData.serviceArea}
                       onChange={handleChange}
                     />
                   </div>
-                  <span className="text-xs text-muted block mt-2 flex items-center gap-1">
-                    <Info size={13} color="var(--primary-700)" />
-                    <span>Your account starts in <strong>Pending Verification</strong> status until document approval.</span>
-                  </span>
+
+                  <div className="form-group mb-2">
+                    <label className="form-label text-xs font-semibold">Supporting Verification Credential</label>
+                    <select className="form-control" defaultValue="trade_license">
+                      <option value="trade_license">Government Trade Wireman / Plumber License</option>
+                      <option value="iti_cert">ITI / Polytechnic Vocational Certificate</option>
+                      <option value="govt_id">Government Photo ID (Aadhaar/Voter Card)</option>
+                    </select>
+                  </div>
+
+                  {/* Privacy & Trust Notice */}
+                  <div
+                    style={{
+                      backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                      border: '1px solid rgba(16, 185, 129, 0.25)',
+                      borderRadius: 'var(--radius-sm)',
+                      padding: '8px 10px',
+                      fontSize: '11px',
+                      color: 'var(--success-900)',
+                      lineHeight: 1.45,
+                      marginTop: '0.75rem',
+                    }}
+                  >
+                    🔒 <strong>Identity Privacy Guarantee:</strong> Real Aadhaar, PAN, and sensitive numbers are never displayed publicly. Only your verified trade badge and certifications are shown on your professional profile.
+                  </div>
                 </div>
               )}
 

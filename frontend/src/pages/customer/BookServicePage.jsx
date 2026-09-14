@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { categoryService } from '../../services/categoryService';
@@ -59,6 +59,8 @@ export const BookServicePage = () => {
   const [selectedTime, setSelectedTime] = useState('10:00 AM - 12:00 PM');
   const [selectedAddressId, setSelectedAddressId] = useState('');
   const [issueDescription, setIssueDescription] = useState('');
+  const [providerSearchQuery, setProviderSearchQuery] = useState('');
+  const [showAllProviders, setShowAllProviders] = useState(false);
 
   // Add Address Modal State
   const [addAddressModalOpen, setAddAddressModalOpen] = useState(false);
@@ -97,18 +99,28 @@ export const BookServicePage = () => {
           setSelectedAddressId(defaultAddr.id);
         }
 
+        // Auto-select initial provider
+        let foundProv = null;
+        if (initialProviderId) {
+          foundProv = allProvs.find(p => String(p.id) === String(initialProviderId));
+          if (foundProv) setSelectedProvider(foundProv);
+        }
+
         // Auto-select initial service
         if (initialServiceId) {
           const foundServ = allServs.find(s => String(s.id) === String(initialServiceId));
           if (foundServ) setSelectedService(foundServ);
+        } else if (foundProv && allServs.length > 0) {
+          // If booked directly with a provider without serviceId, match provider's trade
+          const pTrade = (foundProv.service || foundProv.trade || foundProv.businessName || '').toLowerCase();
+          const matchingServ = allServs.find(s => {
+            const sCat = (s.categoryName || '').toLowerCase();
+            const sName = (s.name || '').toLowerCase();
+            return pTrade.includes(sCat) || sCat.includes(pTrade) || pTrade.includes(sName);
+          });
+          setSelectedService(matchingServ || allServs[0]);
         } else if (allServs.length > 0) {
           setSelectedService(allServs[0]);
-        }
-
-        // Auto-select initial provider
-        if (initialProviderId) {
-          const foundProv = allProvs.find(p => String(p.id) === String(initialProviderId));
-          if (foundProv) setSelectedProvider(foundProv);
         }
       } catch (err) {
         console.error('Failed to load booking data:', err);
@@ -120,14 +132,28 @@ export const BookServicePage = () => {
     initData();
   }, [user?.id, initialServiceId, initialProviderId]);
 
-  // When selected service changes, filter matching providers
-  const availableProviders = selectedService
-    ? providers.filter(p => {
+  // When selected service changes, filter matching providers, or allow searching all platform providers
+  const availableProviders = useMemo(() => {
+    let list = providers;
+    if (!showAllProviders && selectedService) {
+      list = list.filter(p => {
         const pTrade = (p.service || '').toLowerCase();
         const sCat = (selectedService.categoryName || '').toLowerCase();
         return pTrade.includes(sCat) || sCat.includes(pTrade) || pTrade.includes('repair');
-      })
-    : providers;
+      });
+    }
+
+    if (providerSearchQuery.trim()) {
+      const q = providerSearchQuery.toLowerCase().trim();
+      list = list.filter(p =>
+        (p.name || '').toLowerCase().includes(q) ||
+        (p.companyName || '').toLowerCase().includes(q) ||
+        (p.service || '').toLowerCase().includes(q) ||
+        (p.city || '').toLowerCase().includes(q)
+      );
+    }
+    return list;
+  }, [providers, selectedService, showAllProviders, providerSearchQuery]);
 
   const timeSlots = [
     { label: '09:00 AM - 11:00 AM', tag: 'Morning' },
@@ -428,7 +454,48 @@ export const BookServicePage = () => {
                 <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '0.5rem' }}>
                   Step 02: Select Service Provider
                 </h3>
-                <p className="text-xs text-muted mb-4">Pick a verified expert or let TrustFix automatically assign the best nearby specialist.</p>
+                <p className="text-xs text-muted mb-3">
+                  Choose any verified specialist you trust, or let TrustFix automatically assign the best nearby technician.
+                </p>
+
+                {/* CRUCIAL RULE CALLOUT BANNER */}
+                <div
+                  style={{
+                    backgroundColor: 'rgba(37, 99, 235, 0.08)',
+                    border: '1px solid rgba(37, 99, 235, 0.25)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '10px 14px',
+                    fontSize: '12px',
+                    color: 'var(--primary-900)',
+                    marginBottom: '1.25rem',
+                    lineHeight: 1.5,
+                  }}
+                >
+                  💡 <strong>Provider Selection Freedom:</strong> Nearby providers are recommendations, <strong>NOT a restriction</strong>. You can choose any specialist you prefer across the platform — for instance, a trusted electrician you previously worked with!
+                </div>
+
+                {/* Search & Network Toggle Toolbar */}
+                <div className="flex items-center gap-3 mb-4 flex-wrap">
+                  <div style={{ flex: '1 1 220px', position: 'relative' }}>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Search any specialist by name or business..."
+                      value={providerSearchQuery}
+                      onChange={(e) => setProviderSearchQuery(e.target.value)}
+                      style={{ fontSize: '13px' }}
+                    />
+                  </div>
+
+                  <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer text-muted">
+                    <input
+                      type="checkbox"
+                      checked={showAllProviders}
+                      onChange={(e) => setShowAllProviders(e.target.checked)}
+                    />
+                    <span>Show all platform specialists ({providers.length})</span>
+                  </label>
+                </div>
 
                 {/* Option: Auto Assign */}
                 <div
@@ -471,47 +538,61 @@ export const BookServicePage = () => {
                 </div>
 
                 {/* List of Specific Providers */}
-                <div className="flex flex-col gap-3 mb-6">
-                  {availableProviders.map((p) => {
-                    const isSelected = selectedProvider?.id === p.id;
-                    return (
-                      <div
-                        key={p.id}
-                        onClick={() => setSelectedProvider(p)}
-                        className="card card-hoverable cursor-pointer"
-                        style={{
-                          padding: '1rem 1.25rem',
-                          border: isSelected ? '2px solid var(--primary-700)' : '1px solid var(--neutral-200)',
-                          backgroundColor: isSelected ? 'var(--primary-50)' : 'var(--white)',
-                          cursor: 'pointer',
-                        }}
+                <div className="flex flex-col gap-3 mb-6" style={{ maxHeight: '420px', overflowY: 'auto' }}>
+                  {availableProviders.length === 0 ? (
+                    <div className="p-4 text-center text-xs text-muted border rounded">
+                      No matching specialists found for "{providerSearchQuery}".
+                      <button
+                        type="button"
+                        onClick={() => { setProviderSearchQuery(''); setShowAllProviders(true); }}
+                        className="btn-link block mt-1"
+                        style={{ background: 'none', border: 'none', color: 'var(--primary-700)', cursor: 'pointer' }}
                       >
-                        <div className="flex items-center justify-between flex-wrap gap-2">
-                          <div className="flex items-center gap-3">
-                            <img
-                              src={p.avatar}
-                              alt={p.name}
-                              style={{ width: '44px', height: '44px', borderRadius: 'var(--radius-md)', objectFit: 'cover' }}
-                            />
-                            <div>
-                              <div className="flex items-center gap-1.5">
-                                <h5 style={{ fontSize: '0.95rem', fontWeight: 700, margin: 0 }}>{p.name}</h5>
-                                <span className="badge badge-verified" style={{ fontSize: '10px', padding: '1px 5px' }}>Verified</span>
+                        Clear search & show all network specialists
+                      </button>
+                    </div>
+                  ) : (
+                    availableProviders.map((p) => {
+                      const isSelected = selectedProvider?.id === p.id;
+                      return (
+                        <div
+                          key={p.id}
+                          onClick={() => setSelectedProvider(p)}
+                          className="card card-hoverable cursor-pointer"
+                          style={{
+                            padding: '1rem 1.25rem',
+                            border: isSelected ? '2px solid var(--primary-700)' : '1px solid var(--neutral-200)',
+                            backgroundColor: isSelected ? 'var(--primary-50)' : 'var(--white)',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <div className="flex items-center justify-between flex-wrap gap-2">
+                            <div className="flex items-center gap-3">
+                              <img
+                                src={p.avatar}
+                                alt={p.name}
+                                style={{ width: '46px', height: '46px', borderRadius: 'var(--radius-md)', objectFit: 'cover' }}
+                              />
+                              <div>
+                                <div className="flex items-center gap-1.5">
+                                  <h5 style={{ fontSize: '0.95rem', fontWeight: 700, margin: 0 }}>{p.name}</h5>
+                                  <span className="badge badge-verified" style={{ fontSize: '10px', padding: '1px 5px' }}>Verified</span>
+                                </div>
+                                <span className="text-xs text-muted">
+                                  {p.companyName} • ★{p.rating} ({p.experience || 5} yrs exp)
+                                </span>
                               </div>
-                              <span className="text-xs text-muted">
-                                {p.companyName} • ★{p.rating} ({p.experience} yrs exp)
-                              </span>
+                            </div>
+
+                            <div className="text-right">
+                              <span className="text-xs font-bold text-primary">{p.city || 'Mumbai'}</span>
+                              <span className="text-2xs text-muted block">Area: {p.serviceArea || 'Metro Area'}</span>
                             </div>
                           </div>
-
-                          <div className="text-right">
-                            <span className="text-xs font-bold text-primary">{p.city || 'Mumbai'}</span>
-                            <span className="text-2xs text-muted block">Radius: {p.serviceRadiusKm || 25} km</span>
-                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })
+                  )}
                 </div>
 
                 <div className="flex justify-between">

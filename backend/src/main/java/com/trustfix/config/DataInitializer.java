@@ -72,18 +72,17 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) {
         log.info("Checking and initializing TrustFix production/demo seed data...");
 
-        // 1. Initialize Admin Account with safe fallback
-        String adminEmail = System.getenv("ADMIN_EMAIL");
-        if (adminEmail == null || adminEmail.isBlank()) {
-            adminEmail = "admin@trustfix.com";
-        }
-
+        // 1. Initialize Admin Account with standard and custom fallback
+        String customAdminEmail = System.getenv("ADMIN_EMAIL");
         String adminPassword = System.getenv("ADMIN_PASSWORD");
         if (adminPassword == null || adminPassword.isBlank()) {
             adminPassword = "Admin@123";
         }
-    
-        initUser("Pushpendra Yadav (Admin)", adminEmail, "+919820100001", adminPassword, UserRole.ADMIN);  
+
+        initUser("TrustFix Admin", "admin@trustfix.com", "+919820100001", adminPassword, UserRole.ADMIN);
+        if (customAdminEmail != null && !customAdminEmail.isBlank() && !customAdminEmail.equalsIgnoreCase("admin@trustfix.com")) {
+            initUser("Pushpendra Yadav (Admin)", customAdminEmail, "+919820100099", adminPassword, UserRole.ADMIN);
+        }  
 
         // 2. Initialize Categories & Services
         Category electrical = initCategory("Electrical", "Certified electricians for wiring, fixtures, switchboards, and electrical repairs.", "⚡");

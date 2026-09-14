@@ -208,7 +208,7 @@ export const AdminDashboardPage = () => {
                   >
                     <div>
                       <strong className="text-xs block">{b.serviceName}</strong>
-                      <span className="text-2xs text-muted font-mono">{b.bookingReference} • {formatDate(b.date)}</span>
+                      <span className="text-2xs text-muted font-mono">{b.bookingReference} • {formatDate(b.date || b.bookingDate)}</span>
                     </div>
 
                     <div className="flex items-center gap-2">
