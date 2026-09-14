@@ -32,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(ProviderProfileController.class)
 @AutoConfigureMockMvc(addFilters = false)
+@SuppressWarnings("null")
 class ProviderProfileControllerTest {
 
     @Autowired

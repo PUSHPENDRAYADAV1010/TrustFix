@@ -1,6 +1,5 @@
 package com.trustfix.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trustfix.entity.Booking;
 import com.trustfix.entity.ProviderProfile;
 import com.trustfix.entity.Review;
@@ -19,12 +18,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -33,6 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(ReviewController.class)
 @AutoConfigureMockMvc(addFilters = false)
+@SuppressWarnings("null")
 class ReviewControllerTest {
 
     @Autowired
@@ -49,11 +47,6 @@ class ReviewControllerTest {
 
     @MockBean
     private UserRepository userRepository;
-
-
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     private Review sampleReview;
 
