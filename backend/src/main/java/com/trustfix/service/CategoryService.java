@@ -12,6 +12,7 @@ import java.util.Optional;
 
 @Service
 @Transactional
+@SuppressWarnings("null")
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;

@@ -23,6 +23,7 @@ import java.util.Objects;
 
 @Service
 @Transactional
+@SuppressWarnings("null")
 public class ProviderProfileService {
 
     private final ProviderProfileRepository providerProfileRepository;

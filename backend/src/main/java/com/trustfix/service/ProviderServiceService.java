@@ -16,6 +16,7 @@ import java.util.List;
 
 @org.springframework.stereotype.Service
 @Transactional
+@SuppressWarnings("null")
 public class ProviderServiceService {
 
     private final ProviderServiceRepository providerServiceRepository;
