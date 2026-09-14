@@ -168,15 +168,15 @@ export const AdminBookingsPage = () => {
                         <span className="text-2xs text-muted">{b.customerPhone || b.customerEmail || ''}</span>
                       </td>
                       <td>
-                        <span className="text-xs font-medium">{b.providerName || 'Auto-Dispatch'}</span>
+                        <span className="text-xs font-medium">{b.providerName || b.providerBusinessName || 'Auto-Dispatch'}</span>
                       </td>
                       <td>
-                        <span className="text-xs block">{formatDate(b.date)}</span>
-                        <span className="text-2xs text-muted">{b.time}</span>
+                        <span className="text-xs block">{formatDate(b.date || b.bookingDate)}</span>
+                        <span className="text-2xs text-muted">{b.time || b.bookingTime}</span>
                       </td>
                       <td>
                         <strong className="text-sm text-primary">
-                          {formatCurrency(b.price || b.totalPrice || 499)}
+                          {formatCurrency(b.price || b.totalPrice || b.totalAmount || 499)}
                         </strong>
                       </td>
                       <td>

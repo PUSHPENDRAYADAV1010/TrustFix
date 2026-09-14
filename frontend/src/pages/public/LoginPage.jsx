@@ -20,7 +20,9 @@ export const LoginPage = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname;
+  const from = location.state?.from
+    ? `${location.state.from.pathname}${location.state.from.search || ''}`
+    : null;
 
   const validate = () => {
     const newErrors = {};
@@ -270,8 +272,44 @@ export const LoginPage = () => {
               </Button>
             </form>
 
+            {/* Quick Demo Logins Bar */}
+            <div style={{ marginTop: '1.25rem', paddingTop: '1.25rem', borderTop: '1px dashed var(--neutral-300)' }}>
+              <span className="text-2xs uppercase text-muted font-bold block mb-2" style={{ letterSpacing: '0.05em' }}>
+                Quick 1-Click Demo Accounts (Select & Click Sign In)
+              </span>
+              <div className="flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={() => { setEmail('customer@trustfix.com'); setPassword('Test@123'); }}
+                  className="btn btn-sm btn-light flex items-center justify-between text-xs"
+                  style={{ padding: '6px 12px', textAlign: 'left' }}
+                >
+                  <span>👤 Customer: <strong>Aarav Sharma</strong></span>
+                  <span className="text-2xs text-muted">customer@trustfix.com</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setEmail('rajesh@trustfix.com'); setPassword('Test@123'); }}
+                  className="btn btn-sm btn-light flex items-center justify-between text-xs"
+                  style={{ padding: '6px 12px', textAlign: 'left', backgroundColor: 'rgba(16, 185, 129, 0.1)', color: 'var(--success-800)', borderColor: 'rgba(16, 185, 129, 0.3)' }}
+                >
+                  <span>⚡ Provider: <strong>Rajesh Kumar (Electrician)</strong></span>
+                  <span className="text-2xs text-muted">rajesh@trustfix.com</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setEmail('admin@trustfix.com'); setPassword('Admin@123'); }}
+                  className="btn btn-sm btn-light flex items-center justify-between text-xs"
+                  style={{ padding: '6px 12px', textAlign: 'left', backgroundColor: 'rgba(30, 58, 138, 0.08)', color: 'var(--primary-800)', borderColor: 'rgba(30, 58, 138, 0.2)' }}
+                >
+                  <span>🛡️ Platform Admin: <strong>Officer</strong></span>
+                  <span className="text-2xs text-muted">admin@trustfix.com</span>
+                </button>
+              </div>
+            </div>
+
             {/* Bottom Register Link */}
-            <div className="text-center mt-6 text-sm text-muted pt-4 border-top" style={{ borderTop: '1px solid var(--neutral-200)' }}>
+            <div className="text-center mt-5 text-sm text-muted pt-3 border-top" style={{ borderTop: '1px solid var(--neutral-200)' }}>
               Don't have an account?{' '}
               <Link to="/register" style={{ fontWeight: 700, color: 'var(--primary-800)' }}>
                 Register

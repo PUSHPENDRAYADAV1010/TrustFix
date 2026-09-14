@@ -6,7 +6,6 @@ import com.trustfix.entity.BookingStatus;
 import com.trustfix.entity.Category;
 import com.trustfix.entity.ProviderProfile;
 import com.trustfix.entity.ProviderService;
-import com.trustfix.entity.Review;
 import com.trustfix.entity.Service;
 import com.trustfix.entity.User;
 import com.trustfix.entity.UserRole;
@@ -16,7 +15,6 @@ import com.trustfix.repository.BookingRepository;
 import com.trustfix.repository.CategoryRepository;
 import com.trustfix.repository.ProviderProfileRepository;
 import com.trustfix.repository.ProviderServiceRepository;
-import com.trustfix.repository.ReviewRepository;
 import com.trustfix.repository.ServiceRepository;
 import com.trustfix.repository.UserRepository;
 import org.slf4j.Logger;
@@ -44,7 +42,6 @@ public class DataInitializer implements CommandLineRunner {
     private final ProviderServiceRepository providerServiceRepository;
     private final AddressRepository addressRepository;
     private final BookingRepository bookingRepository;
-    private final ReviewRepository reviewRepository;
     private final PasswordEncoder passwordEncoder;
 
     public DataInitializer(UserRepository userRepository,
@@ -54,7 +51,6 @@ public class DataInitializer implements CommandLineRunner {
                            ProviderServiceRepository providerServiceRepository,
                            AddressRepository addressRepository,
                            BookingRepository bookingRepository,
-                           ReviewRepository reviewRepository,
                            PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.providerProfileRepository = providerProfileRepository;
@@ -63,7 +59,6 @@ public class DataInitializer implements CommandLineRunner {
         this.providerServiceRepository = providerServiceRepository;
         this.addressRepository = addressRepository;
         this.bookingRepository = bookingRepository;
-        this.reviewRepository = reviewRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -72,18 +67,17 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) {
         log.info("Checking and initializing TrustFix production/demo seed data...");
 
-        // 1. Initialize Admin Account with safe fallback
-        String adminEmail = System.getenv("ADMIN_EMAIL");
-        if (adminEmail == null || adminEmail.isBlank()) {
-            adminEmail = "admin@trustfix.com";
-        }
-
+        // 1. Initialize Admin Account with standard and custom fallback
+        String customAdminEmail = System.getenv("ADMIN_EMAIL");
         String adminPassword = System.getenv("ADMIN_PASSWORD");
         if (adminPassword == null || adminPassword.isBlank()) {
             adminPassword = "Admin@123";
         }
-    
-        initUser("Pushpendra Yadav (Admin)", adminEmail, "+919820100001", adminPassword, UserRole.ADMIN);  
+
+        initUser("TrustFix Admin", "admin@trustfix.com", "+919820100001", adminPassword, UserRole.ADMIN);
+        if (customAdminEmail != null && !customAdminEmail.isBlank() && !customAdminEmail.equalsIgnoreCase("admin@trustfix.com")) {
+            initUser("Pushpendra Yadav (Admin)", customAdminEmail, "+919820100099", adminPassword, UserRole.ADMIN);
+        }  
 
         // 2. Initialize Categories & Services
         Category electrical = initCategory("Electrical", "Certified electricians for wiring, fixtures, switchboards, and electrical repairs.", "⚡");
@@ -101,8 +95,8 @@ public class DataInitializer implements CommandLineRunner {
         Service sClean2 = initService(cleaning, "Kitchen & Appliance Deep Clean", "Degreasing of gas stove, kitchen slabs, exhaust chimney, and cabinets.", new BigDecimal("899.00"), 120, "https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=500&auto=format&fit=crop&q=80");
         Service sAc1 = initService(acRepair, "AC Deep Jet Servicing", "High-pressure jet pump cleaning of indoor cooling coils and outdoor unit.", new BigDecimal("599.00"), 45, "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=500&auto=format&fit=crop&q=80");
         Service sAc2 = initService(acRepair, "AC Cooling & Gas Refill", "Refrigerant leak test, vacuuming, and complete gas charging for split/window AC.", new BigDecimal("1899.00"), 60, "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=500&auto=format&fit=crop&q=80");
-        Service sApp1 = initService(applianceRepair, "Washing Machine Diagnostic & Repair", "Motor inspection, drum rotation fix, water inlet valve and PCB troubleshooting.", new BigDecimal("499.00"), 60, "https://images.unsplash.com/photo-1610557892470-55d9e80c0bce?w=500&auto=format&fit=crop&q=80");
-        Service sPaint1 = initService(painting, "Interior Wall Painting & Touch-up", "Premium emulsion wall painting with surface putty prep and roller finish.", new BigDecimal("1299.00"), 240, "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=500&auto=format&fit=crop&q=80");
+        initService(applianceRepair, "Washing Machine Diagnostic & Repair", "Motor inspection, drum rotation fix, water inlet valve and PCB troubleshooting.", new BigDecimal("499.00"), 60, "https://images.unsplash.com/photo-1610557892470-55d9e80c0bce?w=500&auto=format&fit=crop&q=80");
+        initService(painting, "Interior Wall Painting & Touch-up", "Premium emulsion wall painting with surface putty prep and roller finish.", new BigDecimal("1299.00"), 240, "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=500&auto=format&fit=crop&q=80");
 
         // 3. Initialize Customer Account & Address
         User customer = initUser("Test Customer", "testcustomer@gmail.com", "+919820111111", "Test@123", UserRole.CUSTOMER);

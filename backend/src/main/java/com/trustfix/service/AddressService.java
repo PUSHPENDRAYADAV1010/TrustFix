@@ -14,6 +14,7 @@ import java.util.Optional;
 
 @Service
 @Transactional
+@SuppressWarnings("null")
 public class AddressService {
 
     private final AddressRepository addressRepository;

@@ -34,6 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(ServiceController.class)
 @AutoConfigureMockMvc(addFilters = false)
+@SuppressWarnings("null")
 class ServiceControllerTest {
 
     @Autowired

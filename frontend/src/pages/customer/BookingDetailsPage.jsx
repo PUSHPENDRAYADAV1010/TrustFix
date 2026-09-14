@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { bookingService } from '../../services/bookingService';
 import { locationService } from '../../services/locationService';
+import { reviewService } from '../../services/reviewService';
 import { DashboardHeader } from '../../components/dashboard/DashboardHeader';
 import { StatusBadge } from '../../components/common/StatusBadge';
 import { VerificationBadge } from '../../components/common/VerificationBadge';
@@ -21,7 +22,8 @@ import {
   XCircle,
   ArrowLeft,
   CreditCard,
-  Check
+  Check,
+  Star
 } from 'lucide-react';
 
 export const BookingDetailsPage = () => {
@@ -36,7 +38,35 @@ export const BookingDetailsPage = () => {
   const [cancelReason, setCancelReason] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
 
+  // Review Modal State
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState('');
+  const [reviewSuccess, setReviewSuccess] = useState(false);
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+
   const navigate = useNavigate();
+
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    if (!booking) return;
+    setReviewSubmitting(true);
+    try {
+      await reviewService.createReview({
+        bookingId: booking.id,
+        rating,
+        comment,
+      });
+      setReviewSuccess(true);
+      setTimeout(() => {
+        setReviewModalOpen(false);
+      }, 1500);
+    } catch (err) {
+      alert(err.message || 'Failed to submit review');
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
 
   const fetchDetails = async () => {
     setLoading(true);
@@ -139,16 +169,34 @@ export const BookingDetailsPage = () => {
               </div>
             </div>
 
-            {(booking.status === 'PENDING' || booking.status === 'CONFIRMED') && (
-              <button
-                type="button"
-                className="btn btn-sm btn-outline-danger"
-                onClick={() => setCancelModalOpen(true)}
-              >
-                <XCircle size={14} />
-                <span>Cancel Booking</span>
-              </button>
-            )}
+            <div className="flex items-center gap-2">
+              {booking.status === 'COMPLETED' && (
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-success"
+                  onClick={() => {
+                    setRating(5);
+                    setComment('');
+                    setReviewSuccess(false);
+                    setReviewModalOpen(true);
+                  }}
+                >
+                  <Star size={14} />
+                  <span>Rate & Review</span>
+                </button>
+              )}
+
+              {(booking.status === 'PENDING' || booking.status === 'CONFIRMED') && (
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-danger"
+                  onClick={() => setCancelModalOpen(true)}
+                >
+                  <XCircle size={14} />
+                  <span>Cancel Booking</span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -344,6 +392,71 @@ export const BookingDetailsPage = () => {
               onChange={(e) => setCancelReason(e.target.value)}
             />
           </div>
+        </Modal>
+
+        {/* Rate & Review Modal */}
+        <Modal
+          isOpen={reviewModalOpen}
+          onClose={() => setReviewModalOpen(false)}
+          title={`Rate & Review: ${booking?.serviceName || 'Service'}`}
+          footer={
+            !reviewSuccess && (
+              <>
+                <Button variant="secondary" onClick={() => setReviewModalOpen(false)}>
+                  Cancel
+                </Button>
+                <Button variant="primary" loading={reviewSubmitting} onClick={handleReviewSubmit}>
+                  Submit Review
+                </Button>
+              </>
+            )
+          }
+        >
+          {reviewSuccess ? (
+            <div className="text-center py-4">
+              <CheckCircle2 size={36} color="var(--success-600)" style={{ margin: '0 auto 8px auto' }} />
+              <h4 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Thank you for your feedback!</h4>
+              <p className="text-xs text-muted">Your verified review has been recorded on the platform.</p>
+            </div>
+          ) : (
+            <form onSubmit={handleReviewSubmit}>
+              <p className="text-xs text-muted mb-4">
+                How was your experience with <strong>{booking?.providerName}</strong> for <strong>{booking?.serviceName}</strong>?
+              </p>
+
+              <div className="form-group mb-4 text-center">
+                <label className="form-label mb-2">Select Star Rating</label>
+                <div className="flex items-center justify-center gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setRating(star)}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}
+                    >
+                      <Star
+                        size={28}
+                        fill={star <= rating ? '#F59E0B' : 'none'}
+                        color="#F59E0B"
+                      />
+                    </button>
+                  ))}
+                </div>
+                <span className="text-xs font-bold text-muted block mt-1">{rating} out of 5 stars</span>
+              </div>
+
+              <div className="form-group mb-0">
+                <label className="form-label">Review Comment (Optional)</label>
+                <textarea
+                  className="form-control"
+                  rows={3}
+                  placeholder="Share details of technician punctuality, repair quality, or service experience..."
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                />
+              </div>
+            </form>
+          )}
         </Modal>
 
       </div>

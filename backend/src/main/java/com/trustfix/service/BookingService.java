@@ -23,6 +23,7 @@ import java.util.List;
 
 @org.springframework.stereotype.Service
 @Transactional
+@SuppressWarnings("null")
 public class BookingService {
 
     private final BookingRepository bookingRepository;
