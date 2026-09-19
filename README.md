@@ -61,6 +61,7 @@ CREATE DATABASE trustfix CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```bash
 cd backend
 mvn spring-boot:run
+new 
 ```
 The backend server runs on `http://localhost:8080`.
 Verify backend health: `http://localhost:8080/actuator/health`
