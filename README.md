@@ -4,7 +4,7 @@ TrustFix is a modern, verified home service platform connecting Customers, Provi
 
 ---
 
-## 🛠 Tech Stack & Architecture
+# 🛠 Tech Stack & Architecture
 
 - **Frontend**: React 18, Vite, React Router v6, Axios (`apiClient`), Vanilla CSS (Rich aesthetics, dark mode, glassmorphism, responsive micro-animations).
 - **Backend**: Java 21, Spring Boot 3.3.4, Spring Security, JWT (`io.jsonwebtoken`), Spring Data JPA, BCrypt Password Hashing, Spring Boot Actuator.
