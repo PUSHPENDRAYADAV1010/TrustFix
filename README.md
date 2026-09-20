@@ -91,7 +91,7 @@ java -jar backend/target/trustfix-backend-0.0.1-SNAPSHOT.jar
 
 ### Frontend Production Build
 ```bash
-cd frontend
+cd frontend and 
 npm run build
 ```
 Generates static production assets in `frontend/dist/`.
