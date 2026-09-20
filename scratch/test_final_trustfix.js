@@ -106,7 +106,7 @@ async function runAllTests() {
   try {
     const r = await request(`${BASE_URL}/auth/login`, {
       method: 'POST',
-      body: { email: 'testcustomer@gmail.com', password: 'Test@123' },
+      body: { email: 'niranjanvibhute@gmail.com', password: 'nirangan@123' },
     });
     assert(r.ok && r.data.role === 'CUSTOMER' && r.data.message, `Customer login successful (User ID: ${r.data.userId})`);
     custToken = r.data.message;
@@ -121,7 +121,7 @@ async function runAllTests() {
     const r = await request(`${BASE_URL}/users/${custUserId}`, {
       headers: { Authorization: `Bearer ${custToken}` },
     });
-    assert(r.ok && r.data.email === 'testcustomer@gmail.com', `Customer profile retrieved: ${r.data.name} (${r.data.email})`);
+    assert(r.ok && r.data.email === 'niranjanvibhute@gmail.com', `Customer profile retrieved: ${r.data.name} (${r.data.email})`);
   } catch (e) {
     assert(false, `Customer profile check failed: ${e.message}`);
   }
@@ -135,10 +135,10 @@ async function runAllTests() {
       body: {
         addressLine1: 'Flat 502, Ocean Towers',
         addressLine2: 'Palm Beach Road',
-        city: 'Navi Mumbai',
+        city: 'Thane Mumbai',
         state: 'Maharashtra',
-        postalCode: '400703',
-        landmark: 'Near D-Mart',
+        postalCode: '400607',
+        landmark: 'Manpada',
         defaultAddress: true,
         latitude: 19.0760,
         longitude: 72.9986
@@ -184,7 +184,7 @@ async function runAllTests() {
   try {
     const r = await request(`${BASE_URL}/auth/login`, {
       method: 'POST',
-      body: { email: 'testprovider@gmail.com', password: 'Test@123' },
+      body: { email: 'rudrauparkar@gmail.com', password: 'rudraa@123' },
     });
     assert(r.ok && r.data.role === 'PROVIDER' && r.data.message, `Provider login successful (User ID: ${r.data.userId})`);
     provToken = r.data.message;
@@ -275,7 +275,7 @@ async function runAllTests() {
     if (!r.ok) {
       r = await request(`${BASE_URL}/auth/login`, {
         method: 'POST',
-        body: { email: 'admin@trustfix.com', password: 'Admin@123' },
+        body: { email: 'pushpendrayadav@trustfix.com', password: 'pushpendra@123' },
       });
     }
     assert(r.ok && r.data.role === 'ADMIN' && r.data.message, `Admin logged in successfully (${r.data.email})`);
