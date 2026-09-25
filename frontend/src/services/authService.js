@@ -6,7 +6,7 @@ export const authService = {
     try {
       const response = await apiClient.post('/auth/login', { email, password });
       const data = response.data;
-      const token = data.message;
+      const token = data.token || data.message;
       const user = {
         id: data.userId,
         name: data.name,
@@ -41,8 +41,6 @@ export const authService = {
         phone,
         password,
         role: userRole,
-        service: userRole === 'PROVIDER' ? service : undefined,
-        serviceArea: userRole === 'PROVIDER' ? serviceArea : undefined
       });
       const user = {
         id: response.data.id,
@@ -54,7 +52,7 @@ export const authService = {
 
       try {
         const loginResponse = await apiClient.post('/auth/login', { email, password });
-        const token = loginResponse.data.message;
+        const token = loginResponse.data.token || loginResponse.data.message;
         if (token) localStorage.setItem('trustfix_token', token);
       } catch {}
 

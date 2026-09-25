@@ -84,16 +84,7 @@ export const ServiceDetailsPage = () => {
         </nav>
 
         {/* 2-Column Main Layout */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'minmax(0, 1.7fr) minmax(320px, 1fr)',
-            gap: '2.5rem',
-            alignItems: 'start',
-            marginBottom: '3.5rem',
-          }}
-          className="service-details-grid"
-        >
+        <div className="service-details-grid" style={{ marginBottom: '3.5rem' }}>
           {/* LEFT: Service Information */}
           <div>
             {/* Hero Image */}

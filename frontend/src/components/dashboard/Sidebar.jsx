@@ -19,7 +19,6 @@ import {
   Layers,
   Globe,
   LogOut,
-  HelpCircle,
 } from 'lucide-react';
 
 export const Sidebar = ({ role = 'CUSTOMER' }) => {
@@ -33,7 +32,7 @@ export const Sidebar = ({ role = 'CUSTOMER' }) => {
 
   const customerLinks = [
     { to: '/customer/dashboard', label: 'Dashboard', icon: LayoutDashboard, end: true },
-    { to: '/customer/browse', label: 'Find Providers', icon: Search },
+    { to: '/customer/browse', label: 'Find Professionals', icon: Search },
     { to: '/customer/bookings', label: 'My Bookings', icon: Calendar },
     { to: '/customer/addresses', label: 'Saved Addresses', icon: MapPin },
     { to: '/customer/profile', label: 'Profile Settings', icon: User },
@@ -66,16 +65,16 @@ export const Sidebar = ({ role = 'CUSTOMER' }) => {
       {/* Brand Header */}
       <div className="sidebar-brand">
         <Link to="/" className="navbar-brand">
-          <div className="brand-icon" style={{ width: '32px', height: '32px' }}>
-            <ShieldCheck size={18} strokeWidth={2.4} />
+          <div className="brand-icon" style={{ width: '34px', height: '34px' }}>
+            <ShieldCheck size={20} strokeWidth={2.4} />
           </div>
-          <span style={{ fontSize: '1.2rem', fontWeight: 800 }}>TrustFix</span>
+          <span style={{ fontSize: '1.25rem', fontWeight: 800 }}>TrustFix</span>
         </Link>
       </div>
 
       {/* Navigation List */}
       <nav className="sidebar-nav">
-        <div style={{ padding: '0 8px 8px 8px', fontSize: '10px', fontWeight: 700, color: 'var(--neutral-400)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+        <div style={{ padding: '0 8px 8px 8px', fontSize: '11px', fontWeight: 700, color: 'var(--neutral-400)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
           {portalLabel}
         </div>
 
@@ -86,17 +85,23 @@ export const Sidebar = ({ role = 'CUSTOMER' }) => {
               key={link.to}
               to={link.to}
               end={link.end}
+              onClick={() => document.querySelector('.dashboard-layout')?.classList.remove('sidebar-open')}
               className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
             >
-              <Icon size={18} strokeWidth={1.8} />
+              <Icon size={18} strokeWidth={2} />
               <span>{link.label}</span>
             </NavLink>
           );
         })}
 
-        <div style={{ marginTop: 'auto', borderTop: '1px solid var(--neutral-200)', paddingTop: '8px' }}>
-          <Link to="/" className="sidebar-link">
-            <Globe size={18} strokeWidth={1.8} />
+        <div style={{ marginTop: 'auto', borderTop: '1px solid var(--neutral-200)', paddingTop: '10px' }}>
+          <Link
+            to="/"
+            onClick={() => document.querySelector('.dashboard-layout')?.classList.remove('sidebar-open')}
+            className="sidebar-link"
+            style={{ color: 'var(--neutral-600)' }}
+          >
+            <Globe size={18} strokeWidth={2} />
             <span>Back to Website</span>
           </Link>
         </div>
@@ -111,14 +116,16 @@ export const Sidebar = ({ role = 'CUSTOMER' }) => {
             className="user-avatar"
           />
           <div className="min-w-0 flex-1">
-            <h6 className="text-truncate font-bold text-sm" style={{ margin: 0 }}>
+            <h6 className="text-truncate font-bold text-sm" style={{ margin: 0, color: 'var(--neutral-900)' }}>
               {user?.name || 'User'}
             </h6>
-            <div className="flex items-center gap-1 mt-05">
+            <div className="flex items-center gap-1 mt-1">
               {role === 'PROVIDER' ? (
                 <VerificationBadge status={providerProfile?.verificationStatus || 'PENDING'} size="sm" />
               ) : (
-                <span className="text-xs text-muted font-medium">{role === 'ADMIN' ? 'Administrator' : 'Customer'}</span>
+                <span className="badge badge-confirmed" style={{ fontSize: '10px', padding: '2px 6px' }}>
+                  {role === 'ADMIN' ? 'Administrator' : 'Customer'}
+                </span>
               )}
             </div>
           </div>
@@ -129,7 +136,7 @@ export const Sidebar = ({ role = 'CUSTOMER' }) => {
           onClick={handleLogout}
           className="btn btn-sm btn-secondary btn-block"
         >
-          <LogOut size={14} />
+          <LogOut size={15} />
           <span>Sign Out</span>
         </button>
       </div>

@@ -79,17 +79,17 @@ export const LoginPage = () => {
 
   return (
     <div className="auth-split-layout">
-      {/* LEFT 45% MARKETING PANEL */}
+      {/* LEFT 46% MARKETING PANEL */}
       <div className="auth-split-left">
         {/* Brand Logo Header */}
-        <div className="flex items-center gap-2">
-          <div className="brand-icon" style={{ width: '36px', height: '36px' }}>
-            <ShieldCheck size={20} strokeWidth={2.4} />
+        <Link to="/" className="flex items-center gap-2.5" style={{ textDecoration: 'none' }}>
+          <div className="brand-icon" style={{ width: '40px', height: '40px' }}>
+            <ShieldCheck size={22} strokeWidth={2.4} />
           </div>
-          <span style={{ color: 'var(--white)', fontSize: '1.35rem', fontWeight: 800, letterSpacing: '-0.02em' }}>
+          <span style={{ color: 'var(--white)', fontSize: '1.45rem', fontWeight: 800, letterSpacing: '-0.025em' }}>
             TrustFix
           </span>
-        </div>
+        </Link>
 
         {/* Centered Pitch & Benefits */}
         <div className="auth-split-left-content">
@@ -98,95 +98,95 @@ export const LoginPage = () => {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              backgroundColor: 'rgba(37, 99, 235, 0.2)',
-              border: '1px solid rgba(59, 130, 246, 0.3)',
+              backgroundColor: 'rgba(30, 91, 181, 0.22)',
+              border: '1px solid rgba(96, 165, 250, 0.35)',
               borderRadius: 'var(--radius-full)',
-              padding: '4px 12px',
-              fontSize: '11px',
+              padding: '6px 14px',
+              fontSize: 'var(--font-size-xs)',
               fontWeight: 700,
               color: 'var(--primary-300)',
-              marginBottom: '1.25rem',
+              marginBottom: '1.5rem',
               letterSpacing: '0.04em',
               textTransform: 'uppercase',
             }}
           >
-            <ShieldCheck size={14} color="var(--success-400)" />
+            <ShieldCheck size={15} color="var(--success-400)" />
             <span>Verified Professionals</span>
           </div>
 
           <h2
             style={{
-              fontSize: 'clamp(1.85rem, 3.2vw, 2.5rem)',
+              fontSize: 'clamp(2rem, 3.2vw, 2.6rem)',
               fontWeight: 800,
               color: 'var(--white)',
               lineHeight: 1.2,
-              marginBottom: '1rem',
+              marginBottom: '1.25rem',
               letterSpacing: '-0.025em',
             }}
           >
             Trusted professionals.
             <br />
-            <span style={{ color: 'var(--primary-400)' }}>Right at your doorstep.</span>
+            <span style={{ color: 'var(--primary-300)' }}>Right at your doorstep.</span>
           </h2>
 
-          <p style={{ color: 'var(--primary-200)', fontSize: '0.9375rem', lineHeight: 1.6, marginBottom: '2rem' }}>
+          <p style={{ color: 'var(--primary-200)', fontSize: '1rem', lineHeight: 1.65, marginBottom: '2.25rem' }}>
             Sign in to book doorstep services, track your repair technician in real-time, or manage your service requests.
           </p>
 
           {/* Trust Benefits Checkmarks */}
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-2.5 text-sm" style={{ color: 'var(--white)' }}>
+          <div className="flex flex-col gap-3.5">
+            <div className="flex items-center gap-3 text-sm" style={{ color: 'var(--white)' }}>
               <div
                 style={{
-                  width: '22px',
-                  height: '22px',
+                  width: '24px',
+                  height: '24px',
                   borderRadius: '50%',
-                  backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                  backgroundColor: 'rgba(5, 150, 105, 0.25)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   flexShrink: 0,
                 }}
               >
-                <CheckCircle2 size={15} color="var(--success-400)" />
+                <CheckCircle2 size={16} color="var(--success-400)" />
               </div>
-              <span style={{ fontWeight: 600 }}>Verified Professionals (100% Background Checked)</span>
+              <span style={{ fontWeight: 600, fontSize: '0.9375rem' }}>Verified Professionals (100% Background Checked)</span>
             </div>
 
-            <div className="flex items-center gap-2.5 text-sm" style={{ color: 'var(--white)' }}>
+            <div className="flex items-center gap-3 text-sm" style={{ color: 'var(--white)' }}>
               <div
                 style={{
-                  width: '22px',
-                  height: '22px',
+                  width: '24px',
+                  height: '24px',
                   borderRadius: '50%',
-                  backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                  backgroundColor: 'rgba(5, 150, 105, 0.25)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   flexShrink: 0,
                 }}
               >
-                <CheckCircle2 size={15} color="var(--success-400)" />
+                <CheckCircle2 size={16} color="var(--success-400)" />
               </div>
-              <span style={{ fontWeight: 600 }}>Transparent Pricing (₹0 Advance Deposit)</span>
+              <span style={{ fontWeight: 600, fontSize: '0.9375rem' }}>Transparent Pricing (₹0 Advance Deposit)</span>
             </div>
 
-            <div className="flex items-center gap-2.5 text-sm" style={{ color: 'var(--white)' }}>
+            <div className="flex items-center gap-3 text-sm" style={{ color: 'var(--white)' }}>
               <div
                 style={{
-                  width: '22px',
-                  height: '22px',
+                  width: '24px',
+                  height: '24px',
                   borderRadius: '50%',
-                  backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                  backgroundColor: 'rgba(5, 150, 105, 0.25)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   flexShrink: 0,
                 }}
               >
-                <CheckCircle2 size={15} color="var(--success-400)" />
+                <CheckCircle2 size={16} color="var(--success-400)" />
               </div>
-              <span style={{ fontWeight: 600 }}>30-Day Workmanship Warranty</span>
+              <span style={{ fontWeight: 600, fontSize: '0.9375rem' }}>30-Day Workmanship Warranty</span>
             </div>
           </div>
         </div>
@@ -197,16 +197,16 @@ export const LoginPage = () => {
         </div>
       </div>
 
-      {/* RIGHT 55% LOGIN FORM PANEL */}
+      {/* RIGHT 54% LOGIN FORM PANEL */}
       <div className="auth-split-right">
         <div className="auth-card-container">
           
-          <div className="card" style={{ padding: '2.5rem 2rem', backgroundColor: 'var(--white)', boxShadow: 'var(--shadow-md)' }}>
+          <div className="card" style={{ padding: '2.75rem 2.25rem', backgroundColor: 'var(--white)', boxShadow: 'var(--shadow-md)', border: '1px solid var(--neutral-200)' }}>
             <div className="mb-6">
-              <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--neutral-900)', marginBottom: '0.35rem' }}>
+              <h2 style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--neutral-900)', marginBottom: '0.35rem' }}>
                 Welcome back
               </h2>
-              <p className="text-sm text-muted">
+              <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--neutral-600)', margin: 0 }}>
                 Sign in to your TrustFix account.
               </p>
             </div>
@@ -242,7 +242,7 @@ export const LoginPage = () => {
               />
 
               <div className="flex items-center justify-between mb-5">
-                <label className="flex items-center gap-1.5 text-xs text-muted cursor-pointer font-medium">
+                <label className="flex items-center gap-2 text-xs text-muted cursor-pointer font-medium">
                   <input
                     type="checkbox"
                     checked={rememberMe}
@@ -253,7 +253,7 @@ export const LoginPage = () => {
                 <button
                   type="button"
                   className="btn-link text-xs"
-                  style={{ background: 'none', border: 'none', color: 'var(--primary-700)', cursor: 'pointer', fontWeight: 600 }}
+                  style={{ background: 'none', border: 'none', color: 'var(--primary-750)', cursor: 'pointer', fontWeight: 650 }}
                   onClick={() => setForgotModalOpen(true)}
                 >
                   Forgot password?
@@ -265,15 +265,15 @@ export const LoginPage = () => {
                 variant="primary"
                 block
                 loading={loading}
-                style={{ padding: '0.75rem', fontSize: '0.9375rem', fontWeight: 700 }}
+                style={{ padding: '0.8125rem', fontSize: '1rem', fontWeight: 700 }}
               >
                 <span>Sign In</span>
-                <ArrowRight size={15} />
+                <ArrowRight size={16} />
               </Button>
             </form>
 
             {/* Bottom Register Link */}
-            <div className="text-center mt-5 text-sm text-muted pt-3 border-top" style={{ borderTop: '1px solid var(--neutral-200)' }}>
+            <div className="text-center mt-6 text-sm text-muted pt-3 border-top" style={{ borderTop: '1px solid var(--neutral-200)' }}>
               Don't have an account?{' '}
               <Link to="/register" style={{ fontWeight: 700, color: 'var(--primary-800)' }}>
                 Register
@@ -289,7 +289,7 @@ export const LoginPage = () => {
         <div className="modal-backdrop" onClick={() => setForgotModalOpen(false)}>
           <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h4 className="font-bold">Reset Password</h4>
+              <h4 style={{ fontWeight: 750, margin: 0 }}>Reset Password</h4>
               <button className="btn-close" onClick={() => setForgotModalOpen(false)}>
                 <X size={16} />
               </button>
@@ -303,11 +303,11 @@ export const LoginPage = () => {
                   </div>
                 ) : (
                   <>
-                    <p className="text-sm text-muted mb-4">
-                      Enter your registered TrustFix email address and we will send you a password recovery link.
+                    <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--neutral-600)', marginBottom: '1.25rem' }}>
+                      Enter your account email and we'll send a secure password reset link.
                     </p>
                     <Input
-                      label="Registered Email"
+                      label="Email Address"
                       type="email"
                       placeholder="name@example.com"
                       value={forgotEmail}
@@ -318,12 +318,14 @@ export const LoginPage = () => {
                 )}
               </div>
               <div className="modal-footer">
-                <Button variant="secondary" onClick={() => setForgotModalOpen(false)}>
+                <button type="button" className="btn btn-secondary" onClick={() => setForgotModalOpen(false)}>
                   Cancel
-                </Button>
-                <Button type="submit" variant="primary" disabled={forgotSuccess}>
-                  Send Reset Link
-                </Button>
+                </button>
+                {!forgotSuccess && (
+                  <button type="submit" className="btn btn-primary">
+                    Send Reset Link
+                  </button>
+                )}
               </div>
             </form>
           </div>

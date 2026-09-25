@@ -1,13 +1,14 @@
 :root {
   /* ============================================================
-     BRAND COLOR PALETTE - TRUSTFIX DEEP TRUST BLUE
+     BRAND COLOR PALETTE - TRUSTFIX REFINED DEEP TRUST BLUE
      ============================================================ */
-  --primary-950: #071326;
-  --primary-900: #0B1E3B; /* Deep Navy Brand Authority */
-  --primary-850: #0E254A;
-  --primary-800: #1E3A8A; /* Core Trust Blue */
-  --primary-750: #1D4ED8;
-  --primary-700: #2563EB; /* Action Royal Blue */
+  --primary-950: #061122;
+  --primary-900: #0B1E3B; /* Deep Professional Midnight Navy */
+  --primary-850: #0F284E;
+  --primary-800: #163668; /* Core Identity Blue */
+  --primary-750: #1A478C;
+  --primary-700: #1E5BB5; /* Action Royal Blue */
+  --primary-650: #2563EB;
   --primary-600: #3B82F6;
   --primary-500: #60A5FA;
   --primary-400: #93C5FD;
@@ -17,13 +18,13 @@
   --primary-50:  #F8FAFC;
 
   /* Aliased Core Tokens */
-  --primary: var(--primary-800);
-  --primary-dark: var(--primary-900);
+  --primary: var(--primary-900);
+  --primary-dark: var(--primary-950);
   --primary-light: var(--primary-700);
-  --primary-subtle: var(--primary-100);
+  --primary-subtle: #EEF4FF;
 
   /* ============================================================
-     VERIFIED & SUCCESS PALETTE - EMERALD TRUST GREEN
+     VERIFIED & TRUST PALETTE - MUTED EMERALD GREEN
      ============================================================ */
   --success-950: #022C22;
   --success-900: #064E3B;
@@ -34,15 +35,15 @@
   --success-400: #34D399;
   --success-300: #6EE7B7;
   --success-200: #A7F3D0;
-  --success-100: #D1FAE5;
-  --success-50:  #ECFDF5;
+  --success-100: #DCFCE7;
+  --success-50:  #F0FDF4;
 
   --success: var(--success-600);
   --success-light: var(--success-500);
   --success-subtle: var(--success-50);
 
   /* ============================================================
-     WARNING & ACCENT PALETTE - WARM AMBER
+     WARM ACCENT / STAR RATING PALETTE - WARM AMBER
      ============================================================ */
   --warning-900: #78350F;
   --warning-800: #92400E;
@@ -76,7 +77,7 @@
   --danger-subtle: var(--danger-50);
 
   /* ============================================================
-     INFO & HIGHLIGHT PALETTE - SKY CYAN
+     INFO & HIGHLIGHT PALETTE - SLATE BLUE
      ============================================================ */
   --info-800: #075985;
   --info-700: #0369A1;
@@ -88,25 +89,25 @@
   --info-50:  #F0F9FF;
 
   /* ============================================================
-     NEUTRALS & SLATE SURFACE SYSTEM
+     NEUTRALS & SLATE SURFACE SYSTEM (Refined Contrast)
      ============================================================ */
-  --neutral-950: #090D16;
-  --neutral-900: #0F172A; /* Deep Slate Headings */
-  --neutral-850: #141E33;
-  --neutral-800: #1E293B; /* Card Titles & Subheadings */
-  --neutral-700: #334155; /* Primary Body Text */
-  --neutral-600: #475569; /* Secondary Text / Descriptions */
-  --neutral-500: #64748B; /* Muted Meta / Placeholders */
+  --neutral-950: #0A0F1D;
+  --neutral-900: #0F172A; /* Dark Charcoal / Slate Headings */
+  --neutral-850: #152238;
+  --neutral-800: #1E293B; /* Card Headings & Bold Text */
+  --neutral-700: #334155; /* Primary Body Text (High Contrast) */
+  --neutral-600: #475569; /* Secondary / Meta Text */
+  --neutral-500: #64748B; /* Subtle Meta / Placeholder */
   --neutral-400: #94A3B8; /* Disabled / Borders */
-  --neutral-300: #CBD5E1; /* Primary Borders & Dividers */
-  --neutral-200: #E2E8F0; /* Subtle Card Borders */
-  --neutral-150: #EDF2F7;
+  --neutral-300: #CBD5E1; /* Primary Dividers */
+  --neutral-200: #E2E8F0; /* Clean Card Borders */
+  --neutral-150: #EEF2F6;
   --neutral-100: #F1F5F9; /* Surface Backgrounds */
-  --neutral-50:  #F8FAFC; /* Canvas Background */
+  --neutral-50:  #F8FAFC; /* Warm White Canvas Background */
   --white: #FFFFFF;
 
   --text-primary: var(--neutral-900);
-  --text-secondary: var(--neutral-600);
+  --text-secondary: var(--neutral-700);
   --text-muted: var(--neutral-500);
   --border: var(--neutral-200);
   --border-strong: var(--neutral-300);
@@ -115,22 +116,22 @@
   --surface-subtle: var(--neutral-100);
 
   /* ============================================================
-     TYPOGRAPHY SCALE & WEIGHTS
+     TYPOGRAPHY SCALE & HIERARCHY (NO TINY TEXT)
      ============================================================ */
   --font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   
-  --font-size-2xs: 0.6875rem; /* 11px */
-  --font-size-xs:  0.75rem;   /* 12px */
-  --font-size-sm:  0.875rem;  /* 14px */
-  --font-size-base: 1rem;     /* 16px */
-  --font-size-md:  1.0625rem; /* 17px */
-  --font-size-lg:  1.125rem;  /* 18px */
-  --font-size-xl:  1.25rem;   /* 20px */
-  --font-size-2xl: 1.5rem;    /* 24px */
-  --font-size-3xl: 1.875rem;  /* 30px */
-  --font-size-4xl: 2.25rem;   /* 36px */
-  --font-size-5xl: 3rem;      /* 48px */
-  --font-size-6xl: 3.75rem;   /* 60px */
+  --font-size-2xs: 0.75rem;   /* 12px - minimum for tertiary micro-labels */
+  --font-size-xs:  0.8125rem; /* 13px - secondary metadata / timestamps */
+  --font-size-sm:  0.875rem;  /* 14px - standard label / secondary body */
+  --font-size-base: 1rem;     /* 16px - primary body */
+  --font-size-md:  1.0625rem; /* 17px - readable lead body */
+  --font-size-lg:  1.1875rem; /* 19px - card headings */
+  --font-size-xl:  1.375rem;  /* 22px - prominent card title */
+  --font-size-2xl: 1.625rem;  /* 26px - sub-section headings */
+  --font-size-3xl: 1.875rem;  /* 30px - section headings */
+  --font-size-4xl: 2.25rem;   /* 36px - page titles */
+  --font-size-5xl: 3rem;      /* 48px - hero display */
+  --font-size-6xl: 3.75rem;   /* 60px - large display */
 
   --font-weight-regular: 400;
   --font-weight-medium: 500;
@@ -141,7 +142,6 @@
   /* ============================================================
      SPACING & LAYOUT SYSTEM
      ============================================================ */
-  --spacing-05: 0.125rem; /* 2px */
   --spacing-1:  0.25rem;  /* 4px */
   --spacing-15: 0.375rem; /* 6px */
   --spacing-2:  0.5rem;   /* 8px */
@@ -160,34 +160,35 @@
   --spacing-24: 6rem;     /* 96px */
 
   /* ============================================================
-     ELEVATIONS & SHADOWS
+     ELEVATIONS & SHADOWS (Soft, Layered, Non-Harsh)
      ============================================================ */
-  --shadow-xs: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
-  --shadow-sm: 0 1px 3px 0 rgba(15, 23, 42, 0.07), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
-  --shadow-md: 0 4px 14px -2px rgba(15, 23, 42, 0.08), 0 2px 6px -2px rgba(15, 23, 42, 0.04);
-  --shadow-lg: 0 12px 28px -4px rgba(15, 23, 42, 0.10), 0 4px 10px -3px rgba(15, 23, 42, 0.05);
-  --shadow-xl: 0 20px 36px -6px rgba(15, 23, 42, 0.14), 0 8px 16px -4px rgba(15, 23, 42, 0.06);
-  --shadow-glow-blue: 0 0 24px rgba(37, 99, 235, 0.22);
-  --shadow-glow-green: 0 0 24px rgba(16, 185, 129, 0.22);
+  --shadow-xs: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
+  --shadow-sm: 0 1px 3px 0 rgba(15, 23, 42, 0.06), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.08), 0 2px 6px -2px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 10px 24px -4px rgba(15, 23, 42, 0.09), 0 4px 10px -3px rgba(15, 23, 42, 0.04);
+  --shadow-xl: 0 20px 35px -6px rgba(15, 23, 42, 0.12), 0 8px 16px -4px rgba(15, 23, 42, 0.05);
+  --shadow-glow-blue: 0 0 24px rgba(30, 91, 181, 0.20);
+  --shadow-glow-green: 0 0 24px rgba(5, 150, 105, 0.20);
 
   /* ============================================================
-     BORDER RADII
+     BORDER RADII (Balanced Medium Corners)
      ============================================================ */
   --radius-xs: 4px;
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
-  --radius-xl: 20px;
-  --radius-2xl: 28px;
+  --radius-xl: 18px;
+  --radius-2xl: 24px;
   --radius-full: 9999px;
 
   /* ============================================================
-     DIMENSIONS & TRANSITIONS
+     CONTAINERS, DIMENSIONS & TRANSITIONS
      ============================================================ */
-  --container-max: 1240px;
-  --header-height: 72px;
-  --sidebar-width: 270px;
+  --container-max: 1320px;
+  --container-narrow: 1080px;
+  --header-height: 74px;
+  --sidebar-width: 272px;
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-smooth: 350ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-normal: 240ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: 320ms cubic-bezier(0.16, 1, 0.3, 1);
 }

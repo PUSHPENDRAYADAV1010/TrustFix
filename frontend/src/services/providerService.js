@@ -110,9 +110,6 @@ export const providerService = {
     }
     try {
       const payload = {
-        contactName: data.name || data.contactName || '',
-        phone: data.phone || '',
-        serviceArea: data.serviceArea || '',
         businessName: data.companyName || data.businessName || 'Home Repair Enterprise',
         bio: data.bio || 'Professional certified home service provider.',
         experienceYears: Number(data.experience || data.experienceYears) || 5,
