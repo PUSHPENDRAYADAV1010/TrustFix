@@ -51,14 +51,7 @@ export const ManagePricingPage = () => {
       />
 
       <div className="dashboard-content">
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'minmax(0, 1.6fr) minmax(280px, 1fr)',
-            gap: '1.5rem',
-            alignItems: 'start',
-          }}
-        >
+        <div className="pricing-page-grid">
           {/* Pricing Form */}
           <div className="card" style={{ padding: '2rem', backgroundColor: 'var(--white)' }}>
             <h4 style={{ fontSize: '1.15rem', fontWeight: 800, marginBottom: '1.25rem', color: 'var(--neutral-900)' }}>

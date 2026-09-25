@@ -13,66 +13,74 @@ export const CategoryCard = ({ category }) => {
       to={`/services?category=${category?.id || slug}`}
       className="card card-hoverable"
       style={{
-        padding: '1.5rem',
+        padding: '1.75rem 1.5rem',
         textDecoration: 'none',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'flex-start',
         backgroundColor: 'var(--white)',
         height: '100%',
+        borderRadius: 'var(--radius-lg)',
+        border: '1px solid var(--neutral-200)',
       }}
     >
       <div
         style={{
-          width: '48px',
-          height: '48px',
+          width: '52px',
+          height: '52px',
           borderRadius: 'var(--radius-md)',
-          backgroundColor: 'var(--primary-100)',
+          backgroundColor: 'var(--primary-subtle)',
           color: 'var(--primary-800)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          marginBottom: '1rem',
+          marginBottom: '1.25rem',
           border: '1px solid var(--primary-200)',
+          boxShadow: 'var(--shadow-xs)',
+          transition: 'transform var(--transition-fast)',
         }}
       >
-        <CategoryIcon categoryName={cleanName} slug={slug} size={24} strokeWidth={2} />
+        <CategoryIcon categoryName={cleanName} slug={slug} size={26} strokeWidth={2} />
       </div>
 
       <h4
         style={{
-          fontSize: '1.05rem',
-          fontWeight: 700,
+          fontSize: '1.15rem',
+          fontWeight: 750,
           color: 'var(--neutral-900)',
-          marginBottom: '0.35rem',
+          marginBottom: '0.5rem',
+          lineHeight: 1.3
         }}
       >
         {cleanName}
       </h4>
 
       <p
-        className="text-xs text-muted line-clamp-2"
         style={{
-          marginBottom: '1.25rem',
-          lineHeight: 1.5,
+          fontSize: 'var(--font-size-sm)',
+          color: 'var(--neutral-600)',
+          marginBottom: '1.5rem',
+          lineHeight: 1.6,
           flex: 1,
         }}
+        className="line-clamp-2"
       >
         {cleanDesc}
       </p>
 
       <span
-        className="text-xs font-semibold"
         style={{
-          color: 'var(--primary-700)',
+          fontSize: 'var(--font-size-sm)',
+          fontWeight: 650,
+          color: 'var(--primary-750)',
           display: 'inline-flex',
           alignItems: 'center',
-          gap: '4px',
+          gap: '6px',
           marginTop: 'auto',
         }}
       >
         <span>Explore services</span>
-        <ArrowRight size={13} strokeWidth={2.2} />
+        <ArrowRight size={15} strokeWidth={2.2} />
       </span>
     </Link>
   );

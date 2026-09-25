@@ -244,9 +244,26 @@ export const adminService = {
   // Bookings Oversight
   getAllBookings: async () => {
     try {
-      const response = await apiClient.get('/bookings/status/COMPLETED').catch(() => ({ data: [] }));
-      if (Array.isArray(response.data) && response.data.length > 0) return response.data;
-    } catch (e) {}
+      const [pending, confirmed, inProgress, completed, cancelled] = await Promise.all([
+        apiClient.get('/bookings/status/PENDING').catch(() => ({ data: [] })),
+        apiClient.get('/bookings/status/CONFIRMED').catch(() => ({ data: [] })),
+        apiClient.get('/bookings/status/IN_PROGRESS').catch(() => ({ data: [] })),
+        apiClient.get('/bookings/status/COMPLETED').catch(() => ({ data: [] })),
+        apiClient.get('/bookings/status/CANCELLED').catch(() => ({ data: [] })),
+      ]);
+      const all = [
+        ...(pending.data || []),
+        ...(confirmed.data || []),
+        ...(inProgress.data || []),
+        ...(completed.data || []),
+        ...(cancelled.data || []),
+      ];
+      if (all.length > 0) {
+        return all.sort((a, b) => (b.id || 0) - (a.id || 0));
+      }
+    } catch (e) {
+      console.warn('[adminService] Backend fetch failed for bookings:', e.message);
+    }
     return mockBookings;
   }
 };

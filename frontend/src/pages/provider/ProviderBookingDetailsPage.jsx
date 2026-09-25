@@ -169,16 +169,8 @@ export const ProviderBookingDetailsPage = () => {
           </div>
         </div>
 
-        {/* 2-Column Grid */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'minmax(0, 1.7fr) minmax(300px, 1.1fr)',
-            gap: '1.5rem',
-            alignItems: 'start',
-          }}
-          className="provider-job-grid"
-        >
+        {/* 2-Column Responsive Grid */}
+        <div className="provider-job-grid">
           {/* LEFT: Customer, Location, Issue, Timeline */}
           <div className="flex flex-col gap-6">
             

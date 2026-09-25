@@ -201,15 +201,7 @@ export const BookingDetailsPage = () => {
         </div>
 
         {/* 2-Column Main Grid */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'minmax(0, 1.7fr) minmax(300px, 1.1fr)',
-            gap: '1.5rem',
-            alignItems: 'start',
-          }}
-          className="booking-details-grid"
-        >
+        <div className="booking-details-grid">
           {/* LEFT: Appointment Info & Visual Timeline */}
           <div className="flex flex-col gap-6">
             

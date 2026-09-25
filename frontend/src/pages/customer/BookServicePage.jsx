@@ -25,7 +25,9 @@ import {
   Plus,
   AlertCircle,
   Check,
-  Shield
+  Shield,
+  Sparkles,
+  Info
 } from 'lucide-react';
 
 export const BookServicePage = () => {
@@ -33,12 +35,11 @@ export const BookServicePage = () => {
   const [searchParams] = useSearchParams();
   const initialServiceId = searchParams.get('serviceId') || '';
   const initialProviderId = searchParams.get('providerId') || '';
-  const initialCategory = searchParams.get('category') || '';
   const initialDate = searchParams.get('date') || '';
 
   const navigate = useNavigate();
 
-  // Wizard Step State (1 to 5)
+  // 4 Modern Steps
   const [step, setStep] = useState(initialServiceId ? (initialProviderId ? 3 : 2) : 1);
 
   // Data State
@@ -111,8 +112,7 @@ export const BookServicePage = () => {
           const foundServ = allServs.find(s => String(s.id) === String(initialServiceId));
           if (foundServ) setSelectedService(foundServ);
         } else if (foundProv && allServs.length > 0) {
-          // If booked directly with a provider without serviceId, match provider's trade
-          const pTrade = (foundProv.service || foundProv.trade || foundProv.businessName || '').toLowerCase();
+          const pTrade = (foundProv.service || foundProv.trade || foundProv.companyName || '').toLowerCase();
           const matchingServ = allServs.find(s => {
             const sCat = (s.categoryName || '').toLowerCase();
             const sName = (s.name || '').toLowerCase();
@@ -186,7 +186,7 @@ export const BookServicePage = () => {
       return;
     }
     if (!selectedAddressId) {
-      setBookingError('Please select a service address');
+      setBookingError('Please select a doorstep service address');
       return;
     }
 
@@ -229,30 +229,31 @@ export const BookServicePage = () => {
   if (bookingSuccess) {
     return (
       <div>
-        <DashboardHeader title="Booking Confirmed" subtitle="Your service order has been placed" />
+        <DashboardHeader title="Booking Confirmed" subtitle="Your service order has been successfully placed" />
         <div className="dashboard-content">
-          <div className="card" style={{ maxWidth: '640px', margin: '2rem auto', padding: '2.5rem', textAlign: 'center', backgroundColor: 'var(--white)' }}>
+          <div className="card" style={{ maxWidth: '640px', margin: '2rem auto', padding: '2.75rem', textAlign: 'center', backgroundColor: 'var(--white)', border: '1px solid var(--neutral-200)' }}>
             <div
               style={{
-                width: '64px',
-                height: '64px',
+                width: '68px',
+                height: '68px',
                 borderRadius: '50%',
-                backgroundColor: 'var(--success-100)',
+                backgroundColor: 'var(--success-50)',
                 color: 'var(--success-600)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                margin: '0 auto 1.25rem auto',
+                margin: '0 auto 1.5rem auto',
+                border: '2px solid rgba(5, 150, 105, 0.2)'
               }}
             >
-              <CheckCircle2 size={36} strokeWidth={2.4} />
+              <CheckCircle2 size={40} strokeWidth={2.4} />
             </div>
 
             <span className="badge badge-verified mb-2" style={{ margin: '0 auto' }}>
               ₹0 Advance • Pay on Completion
             </span>
 
-            <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--neutral-900)', margin: '0.75rem 0 0.5rem 0' }}>
+            <h2 style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--neutral-900)', margin: '0.75rem 0 0.5rem 0' }}>
               Service Appointment Scheduled!
             </h2>
             <p className="text-xs text-muted mb-6">
@@ -262,38 +263,38 @@ export const BookServicePage = () => {
             <div
               style={{
                 backgroundColor: 'var(--neutral-50)',
-                padding: '1.25rem',
+                padding: '1.25rem 1.5rem',
                 borderRadius: 'var(--radius-md)',
                 border: '1px solid var(--neutral-200)',
                 textAlign: 'left',
-                marginBottom: '1.5rem',
-                fontSize: '0.875rem',
+                marginBottom: '1.75rem',
+                fontSize: 'var(--font-size-sm)',
               }}
             >
-              <div className="flex justify-between py-1 border-bottom" style={{ borderBottom: '1px solid var(--neutral-200)' }}>
+              <div className="flex justify-between py-1.5 border-bottom" style={{ borderBottom: '1px solid var(--neutral-200)' }}>
                 <span className="text-muted">Service</span>
                 <strong>{selectedService?.name}</strong>
               </div>
-              <div className="flex justify-between py-1 border-bottom" style={{ borderBottom: '1px solid var(--neutral-200)' }}>
+              <div className="flex justify-between py-1.5 border-bottom" style={{ borderBottom: '1px solid var(--neutral-200)' }}>
                 <span className="text-muted">Specialist</span>
-                <strong>{selectedProvider?.name || 'Assigned Verified Pro'}</strong>
+                <strong>{selectedProvider?.name || 'Auto-Assigned Verified Pro'}</strong>
               </div>
-              <div className="flex justify-between py-1 border-bottom" style={{ borderBottom: '1px solid var(--neutral-200)' }}>
+              <div className="flex justify-between py-1.5 border-bottom" style={{ borderBottom: '1px solid var(--neutral-200)' }}>
                 <span className="text-muted">Date & Time</span>
                 <strong>{formatDate(selectedDate)} at {selectedTime}</strong>
               </div>
-              <div className="flex justify-between py-1 font-bold text-primary">
+              <div className="flex justify-between py-1.5 font-bold text-primary" style={{ fontSize: '1.05rem' }}>
                 <span>Total Amount Due</span>
                 <span>{formatCurrency(selectedService?.basePrice || 499)}</span>
               </div>
             </div>
 
             <div className="flex items-center justify-center gap-3 flex-wrap">
-              <Link to={`/customer/bookings/${bookingSuccess.id}`} className="btn btn-primary">
+              <Link to={`/customer/bookings/${bookingSuccess.id}`} className="btn btn-primary" style={{ padding: '0.625rem 1.5rem' }}>
                 <span>View Order Details</span>
-                <ArrowRight size={14} />
+                <ArrowRight size={15} />
               </Link>
-              <Link to="/customer/bookings" className="btn btn-secondary">
+              <Link to="/customer/bookings" className="btn btn-secondary" style={{ padding: '0.625rem 1.25rem' }}>
                 My Bookings
               </Link>
             </div>
@@ -303,25 +304,25 @@ export const BookServicePage = () => {
     );
   }
 
+  // 4 Steps Definition
   const stepsList = [
-    { num: 1, label: 'Service' },
-    { num: 2, label: 'Provider' },
-    { num: 3, label: 'Date & Slot' },
-    { num: 4, label: 'Address' },
-    { num: 5, label: 'Confirm' },
+    { num: 1, label: 'Select Service' },
+    { num: 2, label: 'Choose Professional' },
+    { num: 3, label: 'Date & Time' },
+    { num: 4, label: 'Address & Confirmation' },
   ];
 
   return (
     <div>
       <DashboardHeader
-        title="Schedule Home Service"
-        subtitle="Complete 5 simple steps to book verified doorstep technicians."
+        title="Schedule Doorstep Service"
+        subtitle="Follow 4 clear steps to book certified trade specialists."
       />
 
       <div className="dashboard-content">
         
         {/* STEP PROGRESS INDICATOR */}
-        <div className="card mb-6" style={{ padding: '1rem 1.5rem', backgroundColor: 'var(--white)' }}>
+        <div className="card mb-6" style={{ padding: '1.25rem 1.75rem', backgroundColor: 'var(--white)', border: '1px solid var(--neutral-200)' }}>
           <div
             style={{
               display: 'flex',
@@ -352,28 +353,28 @@ export const BookServicePage = () => {
                 >
                   <div
                     style={{
-                      width: '34px',
-                      height: '34px',
+                      width: '38px',
+                      height: '38px',
                       borderRadius: '50%',
-                      backgroundColor: isDone ? 'var(--success-600)' : isActive ? 'var(--primary-700)' : 'var(--neutral-200)',
+                      backgroundColor: isDone ? 'var(--success-600)' : isActive ? 'var(--primary-800)' : 'var(--neutral-200)',
                       color: isDone || isActive ? '#fff' : 'var(--neutral-600)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       fontSize: '13px',
                       fontWeight: 700,
-                      marginBottom: '4px',
+                      marginBottom: '6px',
                       boxShadow: isActive ? '0 0 0 3px var(--primary-100)' : 'none',
                       transition: 'all 0.2s ease',
                     }}
                   >
-                    {isDone ? <Check size={16} strokeWidth={3} /> : `0${s.num}`}
+                    {isDone ? <Check size={18} strokeWidth={3} /> : `0${s.num}`}
                   </div>
                   <span
                     style={{
-                      fontSize: '11px',
-                      fontWeight: isActive ? 700 : 500,
-                      color: isActive ? 'var(--primary-800)' : 'var(--neutral-600)',
+                      fontSize: 'var(--font-size-xs)',
+                      fontWeight: isActive ? 750 : 500,
+                      color: isActive ? 'var(--primary-900)' : 'var(--neutral-600)',
                     }}
                   >
                     {s.label}
@@ -385,16 +386,9 @@ export const BookServicePage = () => {
         </div>
 
         {/* 2-COLUMN WIZARD LAYOUT */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'minmax(0, 1.8fr) minmax(300px, 1.1fr)',
-            gap: '1.5rem',
-            alignItems: 'start',
-          }}
-        >
+        <div className="booking-wizard-grid" style={{ marginBottom: '2.5rem' }}>
           {/* LEFT WIZARD CONTENT */}
-          <div className="card" style={{ padding: '2rem', backgroundColor: 'var(--white)' }}>
+          <div className="card" style={{ padding: '2.25rem 2rem', backgroundColor: 'var(--white)', border: '1px solid var(--neutral-200)' }}>
             
             {bookingError && (
               <div className="alert alert-danger mb-4">
@@ -406,12 +400,14 @@ export const BookServicePage = () => {
             {/* STEP 1: SELECT SERVICE */}
             {step === 1 && (
               <div>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '0.5rem' }}>
-                  Step 01: Choose Service
+                <h3 style={{ fontSize: '1.35rem', fontWeight: 800, marginBottom: '0.35rem', color: 'var(--neutral-900)' }}>
+                  Step 01: Select Service
                 </h3>
-                <p className="text-xs text-muted mb-4">Select the specific home maintenance or repair task needed.</p>
+                <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--neutral-600)', marginBottom: '1.5rem' }}>
+                  Select the specific home maintenance or repair task needed.
+                </p>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px', marginBottom: '1.5rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px', marginBottom: '1.75rem' }}>
                   {services.map((serv) => {
                     const isSelected = selectedService?.id === serv.id;
                     return (
@@ -420,70 +416,71 @@ export const BookServicePage = () => {
                         onClick={() => setSelectedService(serv)}
                         className="card card-hoverable cursor-pointer"
                         style={{
-                          padding: '1rem',
+                          padding: '1.25rem',
                           border: isSelected ? '2px solid var(--primary-700)' : '1px solid var(--neutral-200)',
-                          backgroundColor: isSelected ? 'var(--primary-50)' : 'var(--white)',
+                          backgroundColor: isSelected ? 'var(--primary-subtle)' : 'var(--white)',
                           cursor: 'pointer',
                         }}
                       >
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="badge badge-confirmed" style={{ fontSize: '10px' }}>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className="badge badge-confirmed" style={{ fontSize: '11px' }}>
                             {serv.categoryName}
                           </span>
-                          <strong className="text-xs text-primary">{formatCurrency(serv.basePrice || 499)}</strong>
+                          <strong style={{ fontSize: '1rem', color: 'var(--primary-900)' }}>{formatCurrency(serv.basePrice || 499)}</strong>
                         </div>
-                        <h5 style={{ fontSize: '0.95rem', fontWeight: 700, margin: '4px 0' }}>{serv.name}</h5>
-                        <span className="text-2xs text-muted">~{serv.durationMinutes || 60} mins</span>
+                        <h4 style={{ fontSize: '1.05rem', fontWeight: 750, margin: '6px 0 4px 0', color: 'var(--neutral-900)' }}>
+                          {serv.name}
+                        </h4>
+                        <span className="text-xs text-muted">~{serv.durationMinutes || 60} mins execution</span>
                       </div>
                     );
                   })}
                 </div>
 
-                <div className="flex justify-end">
-                  <Button variant="primary" onClick={() => setStep(2)}>
-                    <span>Continue to Provider</span>
-                    <ArrowRight size={14} />
+                <div className="flex justify-end pt-3 border-top" style={{ borderTop: '1px solid var(--neutral-200)' }}>
+                  <Button variant="primary" onClick={() => setStep(2)} style={{ padding: '0.6875rem 1.5rem', fontWeight: 700 }}>
+                    <span>Continue to Choose Professional</span>
+                    <ArrowRight size={15} />
                   </Button>
                 </div>
               </div>
             )}
 
-            {/* STEP 2: SELECT PROVIDER */}
+            {/* STEP 2: CHOOSE PROFESSIONAL */}
             {step === 2 && (
               <div>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '0.5rem' }}>
-                  Step 02: Select Service Provider
+                <h3 style={{ fontSize: '1.35rem', fontWeight: 800, marginBottom: '0.35rem', color: 'var(--neutral-900)' }}>
+                  Step 02: Choose Professional
                 </h3>
-                <p className="text-xs text-muted mb-3">
+                <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--neutral-600)', marginBottom: '1.25rem' }}>
                   Choose any verified specialist you trust, or let TrustFix automatically assign the best nearby technician.
                 </p>
 
-                {/* CRUCIAL RULE CALLOUT BANNER */}
+                {/* Banner */}
                 <div
                   style={{
-                    backgroundColor: 'rgba(37, 99, 235, 0.08)',
-                    border: '1px solid rgba(37, 99, 235, 0.25)',
+                    backgroundColor: 'var(--primary-subtle)',
+                    border: '1px solid var(--primary-200)',
                     borderRadius: 'var(--radius-md)',
                     padding: '10px 14px',
-                    fontSize: '12px',
+                    fontSize: 'var(--font-size-xs)',
                     color: 'var(--primary-900)',
                     marginBottom: '1.25rem',
                     lineHeight: 1.5,
                   }}
                 >
-                  💡 <strong>Provider Selection Freedom:</strong> Nearby providers are recommendations, <strong>NOT a restriction</strong>. You can choose any specialist you prefer across the platform — for instance, a trusted electrician you previously worked with!
+                  💡 <strong>Provider Selection Freedom:</strong> Nearby distance is a recommendation, <strong>NOT a restriction</strong>. You can choose any verified specialist you prefer across the platform!
                 </div>
 
-                {/* Search & Network Toggle Toolbar */}
+                {/* Search Bar */}
                 <div className="flex items-center gap-3 mb-4 flex-wrap">
-                  <div style={{ flex: '1 1 220px', position: 'relative' }}>
+                  <div style={{ flex: '1 1 240px', position: 'relative' }}>
                     <input
                       type="text"
                       className="form-control"
-                      placeholder="Search any specialist by name or business..."
+                      placeholder="Search specialist by name or trade..."
                       value={providerSearchQuery}
                       onChange={(e) => setProviderSearchQuery(e.target.value)}
-                      style={{ fontSize: '13px' }}
                     />
                   </div>
 
@@ -497,38 +494,39 @@ export const BookServicePage = () => {
                   </label>
                 </div>
 
-                {/* Option: Auto Assign */}
+                {/* Auto Assign Option */}
                 <div
                   onClick={() => setSelectedProvider(null)}
                   className="card card-hoverable cursor-pointer mb-3"
                   style={{
-                    padding: '1rem 1.25rem',
+                    padding: '1.125rem 1.25rem',
                     border: selectedProvider === null ? '2px solid var(--primary-700)' : '1px solid var(--neutral-200)',
-                    backgroundColor: selectedProvider === null ? 'var(--primary-50)' : 'var(--white)',
+                    backgroundColor: selectedProvider === null ? 'var(--primary-subtle)' : 'var(--white)',
                     cursor: 'pointer',
                   }}
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3.5">
                       <div
                         style={{
-                          width: '40px',
-                          height: '40px',
+                          width: '44px',
+                          height: '44px',
                           borderRadius: '50%',
-                          backgroundColor: 'var(--success-100)',
+                          backgroundColor: 'var(--success-50)',
                           color: 'var(--success-700)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
+                          border: '1px solid rgba(5, 150, 105, 0.25)'
                         }}
                       >
-                        <ShieldCheck size={20} />
+                        <ShieldCheck size={22} />
                       </div>
                       <div>
-                        <h5 style={{ fontSize: '0.95rem', fontWeight: 700, margin: 0 }}>
+                        <h4 style={{ fontSize: '1rem', fontWeight: 750, margin: 0, color: 'var(--neutral-900)' }}>
                           Auto-Assign Best Verified Specialist
-                        </h5>
-                        <span className="text-xs text-muted">Recommended • Fast Dispatch & Nearest Availability</span>
+                        </h4>
+                        <span className="text-xs text-muted">Recommended • Nearest availability and instant dispatch</span>
                       </div>
                     </div>
                     {selectedProvider === null && (
@@ -537,71 +535,57 @@ export const BookServicePage = () => {
                   </div>
                 </div>
 
-                {/* List of Specific Providers */}
-                <div className="flex flex-col gap-3 mb-6" style={{ maxHeight: '420px', overflowY: 'auto' }}>
-                  {availableProviders.length === 0 ? (
-                    <div className="p-4 text-center text-xs text-muted border rounded">
-                      No matching specialists found for "{providerSearchQuery}".
-                      <button
-                        type="button"
-                        onClick={() => { setProviderSearchQuery(''); setShowAllProviders(true); }}
-                        className="btn-link block mt-1"
-                        style={{ background: 'none', border: 'none', color: 'var(--primary-700)', cursor: 'pointer' }}
+                {/* Provider List */}
+                <div className="flex flex-col gap-3 mb-6" style={{ maxHeight: '380px', overflowY: 'auto' }}>
+                  {availableProviders.map((p) => {
+                    const isSelected = selectedProvider?.id === p.id;
+                    return (
+                      <div
+                        key={p.id}
+                        onClick={() => setSelectedProvider(p)}
+                        className="card card-hoverable cursor-pointer"
+                        style={{
+                          padding: '1rem 1.25rem',
+                          border: isSelected ? '2px solid var(--primary-700)' : '1px solid var(--neutral-200)',
+                          backgroundColor: isSelected ? 'var(--primary-subtle)' : 'var(--white)',
+                          cursor: 'pointer',
+                        }}
                       >
-                        Clear search & show all network specialists
-                      </button>
-                    </div>
-                  ) : (
-                    availableProviders.map((p) => {
-                      const isSelected = selectedProvider?.id === p.id;
-                      return (
-                        <div
-                          key={p.id}
-                          onClick={() => setSelectedProvider(p)}
-                          className="card card-hoverable cursor-pointer"
-                          style={{
-                            padding: '1rem 1.25rem',
-                            border: isSelected ? '2px solid var(--primary-700)' : '1px solid var(--neutral-200)',
-                            backgroundColor: isSelected ? 'var(--primary-50)' : 'var(--white)',
-                            cursor: 'pointer',
-                          }}
-                        >
-                          <div className="flex items-center justify-between flex-wrap gap-2">
-                            <div className="flex items-center gap-3">
-                              <img
-                                src={p.avatar}
-                                alt={p.name}
-                                style={{ width: '46px', height: '46px', borderRadius: 'var(--radius-md)', objectFit: 'cover' }}
-                              />
-                              <div>
-                                <div className="flex items-center gap-1.5">
-                                  <h5 style={{ fontSize: '0.95rem', fontWeight: 700, margin: 0 }}>{p.name}</h5>
-                                  <span className="badge badge-verified" style={{ fontSize: '10px', padding: '1px 5px' }}>Verified</span>
-                                </div>
-                                <span className="text-xs text-muted">
-                                  {p.companyName} • ★{p.rating} ({p.experience || 5} yrs exp)
-                                </span>
+                        <div className="flex items-center justify-between flex-wrap gap-2">
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={p.avatar}
+                              alt={p.name}
+                              style={{ width: '50px', height: '50px', borderRadius: 'var(--radius-md)', objectFit: 'cover' }}
+                            />
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <h4 style={{ fontSize: '1rem', fontWeight: 750, margin: 0, color: 'var(--neutral-900)' }}>{p.name}</h4>
+                                <span className="badge badge-verified" style={{ fontSize: '10px', padding: '2px 6px' }}>Verified</span>
                               </div>
-                            </div>
-
-                            <div className="text-right">
-                              <span className="text-xs font-bold text-primary">{p.city || 'Mumbai'}</span>
-                              <span className="text-2xs text-muted block">Area: {p.serviceArea || 'Metro Area'}</span>
+                              <span className="text-xs text-muted">
+                                {p.companyName || p.service} • ★{p.rating} ({p.experience || 5} yrs exp)
+                              </span>
                             </div>
                           </div>
+
+                          <div className="text-right">
+                            <span className="text-xs font-bold text-primary">{p.city || 'Mumbai'}</span>
+                            <span className="text-2xs text-muted block">Area: {p.serviceArea || 'Metro Area'}</span>
+                          </div>
                         </div>
-                      );
-                    })
-                  )}
+                      </div>
+                    );
+                  })}
                 </div>
 
-                <div className="flex justify-between">
+                <div className="flex justify-between pt-3 border-top" style={{ borderTop: '1px solid var(--neutral-200)' }}>
                   <Button variant="secondary" onClick={() => setStep(1)}>
                     <ArrowLeft size={14} />
                     <span>Back</span>
                   </Button>
-                  <Button variant="primary" onClick={() => setStep(3)}>
-                    <span>Continue to Schedule</span>
+                  <Button variant="primary" onClick={() => setStep(3)} style={{ fontWeight: 700 }}>
+                    <span>Continue to Date & Time</span>
                     <ArrowRight size={14} />
                   </Button>
                 </div>
@@ -611,13 +595,15 @@ export const BookServicePage = () => {
             {/* STEP 3: DATE & TIME */}
             {step === 3 && (
               <div>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '0.5rem' }}>
-                  Step 03: Select Date & Time Slot
+                <h3 style={{ fontSize: '1.35rem', fontWeight: 800, marginBottom: '0.35rem', color: 'var(--neutral-900)' }}>
+                  Step 03: Date & Time
                 </h3>
-                <p className="text-xs text-muted mb-4">Choose when you would like the certified specialist to arrive.</p>
+                <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--neutral-600)', marginBottom: '1.5rem' }}>
+                  Choose when you would like the certified specialist to arrive at your doorstep.
+                </p>
 
                 {/* Date Picker */}
-                <div className="form-group mb-5">
+                <div className="form-group mb-6">
                   <label className="form-label font-bold">Appointment Date</label>
                   <input
                     type="date"
@@ -631,8 +617,8 @@ export const BookServicePage = () => {
 
                 {/* Time Slots */}
                 <div className="form-group mb-6">
-                  <label className="form-label font-bold">Available Time Slots</label>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '10px' }}>
+                  <label className="form-label font-bold">Available Arrival Slots</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '12px' }}>
                     {timeSlots.map((slot) => {
                       const isSelected = selectedTime === slot.label;
                       return (
@@ -641,14 +627,14 @@ export const BookServicePage = () => {
                           onClick={() => setSelectedTime(slot.label)}
                           className="card card-hoverable cursor-pointer"
                           style={{
-                            padding: '0.875rem',
+                            padding: '1rem',
                             textAlign: 'center',
                             border: isSelected ? '2px solid var(--primary-700)' : '1px solid var(--neutral-200)',
-                            backgroundColor: isSelected ? 'var(--primary-50)' : 'var(--white)',
+                            backgroundColor: isSelected ? 'var(--primary-subtle)' : 'var(--white)',
                             cursor: 'pointer',
                           }}
                         >
-                          <span className="text-2xs font-bold text-muted uppercase block">{slot.tag}</span>
+                          <span className="text-2xs font-bold text-muted uppercase block mb-1">{slot.tag}</span>
                           <strong className="text-xs" style={{ color: isSelected ? 'var(--primary-900)' : 'var(--neutral-800)' }}>
                             {slot.label}
                           </strong>
@@ -658,48 +644,50 @@ export const BookServicePage = () => {
                   </div>
                 </div>
 
-                <div className="flex justify-between">
+                <div className="flex justify-between pt-3 border-top" style={{ borderTop: '1px solid var(--neutral-200)' }}>
                   <Button variant="secondary" onClick={() => setStep(2)}>
                     <ArrowLeft size={14} />
                     <span>Back</span>
                   </Button>
-                  <Button variant="primary" onClick={() => setStep(4)}>
-                    <span>Continue to Address</span>
+                  <Button variant="primary" onClick={() => setStep(4)} style={{ fontWeight: 700 }}>
+                    <span>Continue to Address & Confirmation</span>
                     <ArrowRight size={14} />
                   </Button>
                 </div>
               </div>
             )}
 
-            {/* STEP 4: ADDRESS SELECTION */}
+            {/* STEP 4: ADDRESS & CONFIRMATION */}
             {step === 4 && (
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0 }}>
-                    Step 04: Service Address
+                  <h3 style={{ fontSize: '1.35rem', fontWeight: 800, margin: 0, color: 'var(--neutral-900)' }}>
+                    Step 04: Address & Confirmation
                   </h3>
                   <button
                     type="button"
-                    className="btn btn-sm btn-light text-xs flex items-center gap-1"
+                    className="btn btn-sm btn-light flex items-center gap-1"
                     onClick={() => setAddAddressModalOpen(true)}
                   >
-                    <Plus size={13} />
+                    <Plus size={14} />
                     <span>Add New Address</span>
                   </button>
                 </div>
-                <p className="text-xs text-muted mb-4">Select the doorstep location where the service should be performed.</p>
+                <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--neutral-600)', marginBottom: '1.25rem' }}>
+                  Select the doorstep location and review your appointment details.
+                </p>
 
                 {addresses.length === 0 ? (
-                  <div className="card text-center py-6 mb-4" style={{ backgroundColor: 'var(--neutral-50)' }}>
-                    <MapPin size={28} color="var(--neutral-400)" style={{ margin: '0 auto 8px auto' }} />
+                  <div className="card text-center py-6 mb-5" style={{ backgroundColor: 'var(--neutral-50)' }}>
+                    <MapPin size={32} color="var(--neutral-400)" style={{ margin: '0 auto 8px auto' }} />
                     <p className="text-xs text-muted mb-3">No saved addresses found in your account.</p>
                     <Button variant="primary" size="sm" onClick={() => setAddAddressModalOpen(true)}>
-                      <Plus size={13} />
+                      <Plus size={14} />
                       <span>Add Delivery Address</span>
                     </Button>
                   </div>
                 ) : (
-                  <div className="flex flex-col gap-3 mb-6">
+                  <div className="flex flex-col gap-3 mb-5">
                     {addresses.map((addr) => {
                       const isSelected = String(selectedAddressId) === String(addr.id);
                       return (
@@ -708,18 +696,18 @@ export const BookServicePage = () => {
                           onClick={() => setSelectedAddressId(addr.id)}
                           className="card card-hoverable cursor-pointer"
                           style={{
-                            padding: '1rem',
+                            padding: '1.125rem',
                             border: isSelected ? '2px solid var(--primary-700)' : '1px solid var(--neutral-200)',
-                            backgroundColor: isSelected ? 'var(--primary-50)' : 'var(--white)',
+                            backgroundColor: isSelected ? 'var(--primary-subtle)' : 'var(--white)',
                             cursor: 'pointer',
                           }}
                         >
                           <div className="flex items-start justify-between">
-                            <div className="flex items-start gap-2.5">
-                              <MapPin size={16} color="var(--primary-700)" style={{ marginTop: '2px' }} />
+                            <div className="flex items-start gap-3">
+                              <MapPin size={18} color="var(--primary-700)" style={{ marginTop: '2px' }} />
                               <div>
                                 <div className="flex items-center gap-2">
-                                  <strong className="text-sm font-bold">{addr.label || 'Home'}</strong>
+                                  <strong className="text-sm font-bold text-neutral-900">{addr.label || 'Home'}</strong>
                                   {addr.isDefault && <span className="badge badge-confirmed" style={{ fontSize: '10px' }}>Default</span>}
                                 </div>
                                 <p className="text-xs text-muted mb-0 mt-1">
@@ -736,38 +724,18 @@ export const BookServicePage = () => {
                 )}
 
                 {/* Issue Notes */}
-                <div className="form-group mb-6">
+                <div className="form-group mb-5">
                   <label className="form-label font-bold">Describe Your Issue or Instructions (Optional)</label>
                   <textarea
                     className="form-control"
                     rows={3}
-                    placeholder="e.g. Living room switchboard sparking, water leak under kitchen sink..."
+                    placeholder="e.g. Switchboard sparking in living room, water leak under kitchen sink..."
                     value={issueDescription}
                     onChange={(e) => setIssueDescription(e.target.value)}
                   />
                 </div>
 
-                <div className="flex justify-between">
-                  <Button variant="secondary" onClick={() => setStep(3)}>
-                    <ArrowLeft size={14} />
-                    <span>Back</span>
-                  </Button>
-                  <Button variant="primary" disabled={!selectedAddressId} onClick={() => setStep(5)}>
-                    <span>Review & Confirm</span>
-                    <ArrowRight size={14} />
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {/* STEP 5: FINAL CONFIRMATION */}
-            {step === 5 && (
-              <div>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '0.5rem' }}>
-                  Step 05: Review & Confirm Booking
-                </h3>
-                <p className="text-xs text-muted mb-4">Verify all appointment details before submitting with zero advance deposit.</p>
-
+                {/* Final Order Review Summary Box */}
                 <div
                   style={{
                     backgroundColor: 'var(--neutral-50)',
@@ -776,9 +744,9 @@ export const BookServicePage = () => {
                     border: '1px solid var(--neutral-200)',
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '0.75rem',
-                    fontSize: '0.875rem',
-                    marginBottom: '1.5rem',
+                    gap: '0.625rem',
+                    fontSize: 'var(--font-size-sm)',
+                    marginBottom: '1.25rem',
                   }}
                 >
                   <div className="flex justify-between border-bottom pb-2" style={{ borderBottom: '1px solid var(--neutral-200)' }}>
@@ -792,52 +760,49 @@ export const BookServicePage = () => {
                   </div>
 
                   <div className="flex justify-between border-bottom pb-2" style={{ borderBottom: '1px solid var(--neutral-200)' }}>
-                    <span className="text-muted">Schedule Date:</span>
+                    <span className="text-muted">Scheduled Slot:</span>
                     <strong>{formatDate(selectedDate)} ({selectedTime})</strong>
                   </div>
 
-                  <div className="flex justify-between border-bottom pb-2" style={{ borderBottom: '1px solid var(--neutral-200)' }}>
-                    <span className="text-muted">Doorstep Address:</span>
-                    <strong className="text-truncate">
-                      {(() => {
-                        const a = addresses.find(x => String(x.id) === String(selectedAddressId));
-                        return a ? `${a.flat}, ${a.street}, ${a.city}` : 'Selected Address';
-                      })()}
-                    </strong>
-                  </div>
-
-                  <div className="flex justify-between pt-1 font-bold text-primary" style={{ fontSize: '1.05rem' }}>
+                  <div className="flex justify-between pt-1 font-bold text-primary" style={{ fontSize: '1.15rem' }}>
                     <span>Estimated Total:</span>
                     <span>{formatCurrency(selectedService?.basePrice || 499)}</span>
                   </div>
                 </div>
 
+                {/* Guarantee Banner */}
                 <div
                   style={{
                     backgroundColor: 'var(--success-50)',
-                    border: '1px solid var(--success-100)',
+                    border: '1px solid rgba(5, 150, 105, 0.25)',
                     borderRadius: 'var(--radius-md)',
-                    padding: '0.875rem',
-                    fontSize: '11px',
-                    color: 'var(--success-800)',
+                    padding: '12px 14px',
+                    fontSize: 'var(--font-size-xs)',
+                    color: 'var(--success-900)',
                     marginBottom: '1.5rem',
                   }}
                 >
-                  <div className="flex items-center gap-1.5 font-semibold mb-1">
-                    <ShieldCheck size={14} color="var(--success-600)" />
+                  <div className="flex items-center gap-1.5 font-bold mb-1">
+                    <ShieldCheck size={16} color="var(--success-600)" />
                     <span>TrustFix Booking Guarantee</span>
                   </div>
-                  <span>100% verified technician doorstep visit. Pay securely after job completion and testing. 30-day warranty included.</span>
+                  <span>₹0 advance required. 100% verified technician doorstep visit. Pay securely after job completion and testing. 30-day workmanship warranty included.</span>
                 </div>
 
-                <div className="flex justify-between">
-                  <Button variant="secondary" onClick={() => setStep(4)}>
+                <div className="flex justify-between pt-3 border-top" style={{ borderTop: '1px solid var(--neutral-200)' }}>
+                  <Button variant="secondary" onClick={() => setStep(3)}>
                     <ArrowLeft size={14} />
                     <span>Back</span>
                   </Button>
-                  <Button variant="primary" loading={submitting} onClick={handleFinalBooking}>
-                    <span>Confirm & Book (₹0 Advance)</span>
-                    <ArrowRight size={14} />
+                  <Button
+                    variant="primary"
+                    disabled={!selectedAddressId}
+                    loading={submitting}
+                    onClick={handleFinalBooking}
+                    style={{ padding: '0.75rem 1.75rem', fontWeight: 700 }}
+                  >
+                    <span>Confirm & Schedule Visit</span>
+                    <ArrowRight size={15} />
                   </Button>
                 </div>
               </div>
@@ -845,109 +810,121 @@ export const BookServicePage = () => {
 
           </div>
 
-          {/* RIGHT: STICKY ORDER SUMMARY */}
+          {/* RIGHT: STICKY ORDER SUMMARY PANEL */}
           <div style={{ position: 'sticky', top: '90px' }}>
-            <div className="card" style={{ padding: '1.5rem', backgroundColor: 'var(--white)', boxShadow: 'var(--shadow-md)' }}>
-              <h4 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--neutral-900)' }}>
+            <div className="card" style={{ padding: '1.75rem', backgroundColor: 'var(--white)', border: '1px solid var(--neutral-200)' }}>
+              <h4 style={{ fontSize: '1.15rem', fontWeight: 750, marginBottom: '1.25rem', color: 'var(--neutral-900)' }}>
                 Booking Summary
               </h4>
 
               {selectedService ? (
                 <div>
                   <div className="flex items-center gap-3 pb-3 mb-3 border-bottom" style={{ borderBottom: '1px solid var(--neutral-200)' }}>
-                    <img
-                      src={resolveServiceImage(selectedService)}
-                      alt={selectedService.name}
-                      style={{ width: '56px', height: '56px', borderRadius: 'var(--radius-md)', objectFit: 'cover' }}
-                    />
+                    <div
+                      style={{
+                        width: '46px',
+                        height: '46px',
+                        borderRadius: 'var(--radius-md)',
+                        backgroundColor: 'var(--primary-subtle)',
+                        color: 'var(--primary-800)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Wrench size={22} />
+                    </div>
                     <div>
-                      <h5 style={{ fontSize: '0.95rem', fontWeight: 700, margin: 0 }}>{selectedService.name}</h5>
-                      <span className="text-xs text-muted font-semibold">{selectedService.categoryName}</span>
+                      <h5 style={{ fontSize: '1rem', fontWeight: 750, margin: 0 }}>{selectedService.name}</h5>
+                      <span className="text-xs text-muted">{selectedService.categoryName}</span>
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-2 text-xs text-muted mb-4">
+                  <div className="flex flex-col gap-2.5 text-xs text-muted mb-4">
                     <div className="flex justify-between">
-                      <span>Assigned Pro:</span>
-                      <strong className="text-neutral-800">{selectedProvider?.name || 'Auto-Dispatch'}</strong>
+                      <span>Assigned Specialist:</span>
+                      <strong className="text-neutral-900">{selectedProvider?.name || 'Auto-Assign Best Pro'}</strong>
                     </div>
                     <div className="flex justify-between">
-                      <span>Date:</span>
-                      <strong className="text-neutral-800">{formatDate(selectedDate)}</strong>
+                      <span>Schedule:</span>
+                      <strong className="text-neutral-900">{selectedDate} ({selectedTime.split(' - ')[0]})</strong>
                     </div>
                     <div className="flex justify-between">
-                      <span>Slot:</span>
-                      <strong className="text-neutral-800">{selectedTime}</strong>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Advance Fee:</span>
-                      <strong className="text-success">₹0.00</strong>
+                      <span>Advance Deposit:</span>
+                      <strong className="text-success font-bold">₹0 (Pay Later)</strong>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-3 border-top" style={{ borderTop: '1px solid var(--neutral-200)' }}>
-                    <span className="text-xs text-muted font-bold uppercase">Estimated Amount:</span>
-                    <span style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--primary-800)' }}>
-                      {formatCurrency(selectedService.basePrice || 499)}
-                    </span>
+                  <div className="pt-3 border-top mb-4" style={{ borderTop: '1px solid var(--neutral-200)' }}>
+                    <div className="flex justify-between items-baseline">
+                      <span className="font-bold text-sm text-neutral-900">Total Due on Visit:</span>
+                      <span style={{ fontSize: '1.45rem', fontWeight: 800, color: 'var(--primary-900)' }}>
+                        {formatCurrency(selectedService.basePrice || selectedService.price || 499)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded bg-neutral-50 text-xs text-muted flex items-start gap-2">
+                    <ShieldCheck size={16} color="var(--success-600)" style={{ flexShrink: 0, marginTop: '2px' }} />
+                    <span>Includes 30-day TrustFix warranty and certified inspection.</span>
                   </div>
                 </div>
               ) : (
-                <p className="text-xs text-muted">Please choose a service to see summary details.</p>
+                <p className="text-muted text-xs">Select a service to view rate breakdown.</p>
               )}
             </div>
           </div>
         </div>
 
-        {/* Add Address Modal */}
+      </div>
+
+      {/* Add Address Modal */}
+      {addAddressModalOpen && (
         <Modal
           isOpen={addAddressModalOpen}
           onClose={() => setAddAddressModalOpen(false)}
           title="Add New Service Address"
-          footer={
-            <>
-              <Button variant="secondary" onClick={() => setAddAddressModalOpen(false)}>
-                Cancel
-              </Button>
-              <Button variant="primary" loading={addingAddress} onClick={handleAddAddressSubmit}>
-                Save Address
-              </Button>
-            </>
-          }
         >
           <form onSubmit={handleAddAddressSubmit}>
             <Input
-              label="Flat / House / Building"
-              placeholder="e.g. Flat 402, Green Meadows"
+              label="Flat / House / Suite No."
               value={newAddress.flat}
-              onChange={(e) => setNewAddress({ ...newAddress, flat: e.target.value })}
+              onChange={(e) => setNewAddress(prev => ({ ...prev, flat: e.target.value }))}
+              placeholder="e.g. Flat 402, Greenfield Apts"
               required
             />
             <Input
-              label="Street / Area / Landmark"
-              placeholder="e.g. Link Road, Near Metro Station"
+              label="Street / Landmark"
               value={newAddress.street}
-              onChange={(e) => setNewAddress({ ...newAddress, street: e.target.value })}
+              onChange={(e) => setNewAddress(prev => ({ ...prev, street: e.target.value }))}
+              placeholder="e.g. Linking Road, Bandra West"
               required
             />
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
               <Input
                 label="City"
                 value={newAddress.city}
-                onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
+                onChange={(e) => setNewAddress(prev => ({ ...prev, city: e.target.value }))}
                 required
               />
               <Input
-                label="Postal Code (PIN)"
+                label="Pincode"
                 value={newAddress.pincode}
-                onChange={(e) => setNewAddress({ ...newAddress, pincode: e.target.value })}
+                onChange={(e) => setNewAddress(prev => ({ ...prev, pincode: e.target.value }))}
                 required
               />
             </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="secondary" onClick={() => setAddAddressModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" variant="primary" loading={addingAddress}>
+                Save Address
+              </Button>
+            </div>
           </form>
         </Modal>
-
-      </div>
+      )}
     </div>
   );
 };

@@ -77,14 +77,7 @@ export const ProviderProfilePage = () => {
 
       <div className="dashboard-content">
         
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'minmax(0, 1.6fr) minmax(300px, 1.1fr)',
-            gap: '1.5rem',
-            alignItems: 'start',
-          }}
-        >
+        <div className="provider-profile-grid">
           {/* LEFT: Profile Form */}
           <div className="card" style={{ padding: '2rem', backgroundColor: 'var(--white)' }}>
             

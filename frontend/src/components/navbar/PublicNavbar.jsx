@@ -44,20 +44,20 @@ export const PublicNavbar = () => {
   return (
     <header className="navbar">
       <div className="container nav-container">
-        {/* Brand Logo with Shield */}
+        {/* Left: Brand Logo with Shield */}
         <Link to="/" className="navbar-brand">
           <div className="brand-icon">
-            <ShieldCheck size={20} strokeWidth={2.4} />
+            <ShieldCheck size={22} strokeWidth={2.4} />
           </div>
           <span>TrustFix</span>
           <span className="brand-badge">
-            <Check size={10} strokeWidth={3} />
+            <Check size={11} strokeWidth={3} />
             Verified Pros
           </span>
         </Link>
 
-        {/* Desktop Nav Links */}
-        <nav>
+        {/* Center: Desktop Nav Links */}
+        <nav aria-label="Main Navigation">
           <ul className="nav-links">
             <li>
               <NavLink to="/" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} end>
@@ -71,7 +71,7 @@ export const PublicNavbar = () => {
             </li>
             <li>
               <NavLink to="/browse" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
-                Find Providers
+                Find Professionals
               </NavLink>
             </li>
             <li>
@@ -82,16 +82,16 @@ export const PublicNavbar = () => {
           </ul>
         </nav>
 
-        {/* Right CTA / Search / Auth */}
+        {/* Right: Search / Auth / Profile Actions */}
         <div className="nav-actions">
-          {/* Quick Search Trigger */}
+          {/* Quick Search Input */}
           {searchOpen ? (
-            <form onSubmit={handleSearchSubmit} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <form onSubmit={handleSearchSubmit} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <input
                 type="text"
                 className="form-control"
-                style={{ height: '34px', fontSize: '13px', width: '170px', padding: '4px 8px' }}
-                placeholder="Search service..."
+                style={{ height: '38px', fontSize: '14px', width: '190px', padding: '6px 12px' }}
+                placeholder="Search trade or pro..."
                 value={searchVal}
                 onChange={(e) => setSearchVal(e.target.value)}
                 autoFocus
@@ -99,44 +99,45 @@ export const PublicNavbar = () => {
               <button
                 type="button"
                 className="btn btn-sm btn-secondary"
-                style={{ padding: '4px 8px' }}
+                style={{ padding: '6px 10px' }}
                 onClick={() => setSearchOpen(false)}
+                aria-label="Close search"
               >
-                <X size={14} />
+                <X size={15} />
               </button>
             </form>
           ) : (
             <button
               type="button"
               className="btn btn-sm btn-secondary"
-              style={{ padding: '6px 10px' }}
+              style={{ padding: '7px 11px', borderRadius: 'var(--radius-md)' }}
               onClick={() => setSearchOpen(true)}
-              title="Search services and providers"
+              title="Search services and professionals"
               aria-label="Search"
             >
-              <Search size={14} />
+              <Search size={15} />
             </button>
           )}
 
           {isAuthenticated && user ? (
             <div className="flex items-center gap-2">
-              <Link to={getDashboardPath()} className="btn btn-sm btn-primary">
-                <User size={14} />
-                <span>Dashboard ({role === 'PROVIDER' ? 'Provider' : role === 'ADMIN' ? 'Admin' : 'Customer'})</span>
+              <Link to={getDashboardPath()} className="btn btn-sm btn-primary" style={{ padding: '0.5rem 1rem' }}>
+                <User size={15} />
+                <span>Dashboard</span>
               </Link>
               <button onClick={handleLogout} className="btn btn-sm btn-secondary" title="Log out">
-                <LogOut size={14} />
+                <LogOut size={15} />
                 <span className="hidden sm:inline">Logout</span>
               </button>
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <Link to="/login" className="btn btn-sm btn-secondary">
+              <Link to="/login" className="btn btn-sm btn-secondary" style={{ padding: '0.5rem 1.125rem' }}>
                 Login
               </Link>
-              <Link to="/register" className="btn btn-sm btn-primary">
+              <Link to="/register" className="btn btn-sm btn-primary" style={{ padding: '0.5rem 1.25rem' }}>
                 <span>Get Started</span>
-                <ArrowRight size={13} />
+                <ArrowRight size={14} />
               </Link>
             </div>
           )}
@@ -148,17 +149,17 @@ export const PublicNavbar = () => {
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle navigation menu"
           >
-            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Drawer */}
+      {/* Mobile Drawer Navigation */}
       {mobileMenuOpen && (
         <div className="mobile-nav">
           <NavLink
             to="/"
-            className="nav-link font-semibold text-lg"
+            className="nav-link font-semibold"
             onClick={() => setMobileMenuOpen(false)}
             end
           >
@@ -166,21 +167,21 @@ export const PublicNavbar = () => {
           </NavLink>
           <NavLink
             to="/services"
-            className="nav-link font-semibold text-lg"
+            className="nav-link font-semibold"
             onClick={() => setMobileMenuOpen(false)}
           >
             Services
           </NavLink>
           <NavLink
             to="/browse"
-            className="nav-link font-semibold text-lg"
+            className="nav-link font-semibold"
             onClick={() => setMobileMenuOpen(false)}
           >
-            Find Providers
+            Find Professionals
           </NavLink>
           <a
             href="/#how-it-works"
-            className="nav-link font-semibold text-lg"
+            className="nav-link font-semibold"
             onClick={(e) => {
               setMobileMenuOpen(false);
               handleHowItWorksClick(e);
@@ -189,27 +190,27 @@ export const PublicNavbar = () => {
             How It Works
           </a>
 
-          <div style={{ borderTop: '1px solid var(--neutral-200)', paddingTop: '1.25rem', marginTop: 'auto' }}>
+          <div style={{ borderTop: '1px solid var(--neutral-200)', paddingTop: '1.5rem', marginTop: 'auto' }}>
             {isAuthenticated ? (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2.5">
                 <Link
                   to={getDashboardPath()}
                   className="btn btn-primary btn-block"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <User size={16} />
-                  Go to Dashboard
+                  <span>Go to Dashboard</span>
                 </Link>
                 <button
                   onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
                   className="btn btn-secondary btn-block"
                 >
                   <LogOut size={16} />
-                  Logout
+                  <span>Logout</span>
                 </button>
               </div>
             ) : (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2.5">
                 <Link
                   to="/login"
                   className="btn btn-secondary btn-block"
@@ -223,7 +224,7 @@ export const PublicNavbar = () => {
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <span>Get Started</span>
-                  <ArrowRight size={14} />
+                  <ArrowRight size={15} />
                 </Link>
               </div>
             )}
