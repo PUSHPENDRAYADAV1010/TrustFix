@@ -107,8 +107,7 @@ Generates static production assets in `frontend/dist/`.
 
 ---
 
-## 🧑‍💻 Default Demo Accounts (Development)
+## 🧑‍💻 Default Accounts
 
-- **Customer**: `testcustomer@gmail.com` / `Test@123`
-- **Provider**: `testprovider@gmail.com` / `Test@123`
-- **Admin**: `admin@trustfix.com` / `Admin@123`
+- **Admin**: `admin@trustfix.com` / `231182157800100950` (or `pushpendraydv1010@gmail.com` / `231182157800100950`)
+- **Customer & Provider**: Register new verified accounts via the `/register` page.
