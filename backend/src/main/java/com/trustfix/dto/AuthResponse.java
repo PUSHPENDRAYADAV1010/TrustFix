@@ -12,31 +12,33 @@ public class AuthResponse {
     public AuthResponse() {
     }
 
-    public AuthResponse(String message, Long userId, String name, String email, String role) {
-        this.message = message;
-        this.token = message;
+    public AuthResponse(String token, Long userId, String name, String email, String role) {
+        this(token, userId, name, email, role, "Login successful");
+    }
+
+    public AuthResponse(String token, Long userId, String name, String email, String role, String message) {
+        this.token = token;
         this.userId = userId;
         this.name = name;
         this.email = email;
         this.role = role;
+        this.message = message != null ? message : "Login successful";
     }
 
     public String getToken() {
-        return token != null ? token : message;
+        return token;
     }
 
     public void setToken(String token) {
         this.token = token;
-        this.message = token;
     }
 
     public String getMessage() {
-        return message != null ? message : token;
+        return message;
     }
 
     public void setMessage(String message) {
         this.message = message;
-        this.token = message;
     }
 
     public Long getUserId() {
