@@ -36,7 +36,11 @@ $bookingPayload = @{
     notes = "Automated E2E validation test booking"
 } | ConvertTo-Json
 
-$bookUrl = "$apiUrl/bookings?customerId=" + $custLogin.userId + "&serviceId=" + $services[0].id + "&addressId=" + $addrId + "&providerId=" + $providers[0].id
+$targetProvider = $providers | Where-Object { $_.businessName -like "*Apex*" } | Select-Object -First 1
+if (-not $targetProvider) {
+    $targetProvider = $providers[0]
+}
+$bookUrl = "$apiUrl/bookings?customerId=" + $custLogin.userId + "&serviceId=" + $services[0].id + "&addressId=" + $addrId + "&providerId=" + $targetProvider.id
 $createdBooking = Invoke-RestMethod -Uri $bookUrl -Method Post -Body $bookingPayload -ContentType "application/json" -Headers $custHeaders
 Write-Host "      -> Booking Created! Ref:" $createdBooking.bookingReference "Status:" $createdBooking.status "Amount: Rs." $createdBooking.totalAmount
 
@@ -70,8 +74,14 @@ $reviewUrl = "$apiUrl/reviews?bookingId=" + $createdBooking.id + "&customerId=" 
 $createdReview = Invoke-RestMethod -Uri $reviewUrl -Method Post -Body $reviewPayload -ContentType "application/json" -Headers $custHeaders
 Write-Host "[6/7] Review Submitted for Booking #" $createdReview.bookingId "Rating:" $createdReview.rating "Stars"
 
-# 7. Admin Governance Center
-$adminLogin = Invoke-RestMethod -Uri "$apiUrl/auth/login" -Method Post -Body (@{ email = "admin@trustfix.com"; password = "Admin@123" } | ConvertTo-Json) -ContentType "application/json"
+$adminEmail = if ($env:ADMIN_EMAIL) { $env:ADMIN_EMAIL } else { "admin@trustfix.com" }
+$adminPass = if ($env:ADMIN_PASSWORD) { $env:ADMIN_PASSWORD } else { "Admin@123" }
+$adminLogin = $null
+try {
+    $adminLogin = Invoke-RestMethod -Uri "$apiUrl/auth/login" -Method Post -Body (@{ email = "admin@trustfix.com"; password = "Admin@123" } | ConvertTo-Json) -ContentType "application/json"
+} catch {
+    $adminLogin = Invoke-RestMethod -Uri "$apiUrl/auth/login" -Method Post -Body (@{ email = $adminEmail; password = $adminPass } | ConvertTo-Json) -ContentType "application/json"
+}
 $adminHeaders = @{ Authorization = "Bearer " + $adminLogin.message }
 Write-Host "[7/7] Admin Logged In:" $adminLogin.email "(Role:" $adminLogin.role ")"
 

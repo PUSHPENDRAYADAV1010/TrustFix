@@ -528,8 +528,80 @@ Based on the audit, the recommended implementation order follows the user's phas
 
 ---
 
-## 14. Audit Conclusion & Sign-Off
+---
 
-The TrustFix project has a solid architectural core and high code quality. By methodically addressing the configuration mismatches, removing deceptive mock fallbacks, implementing the missing payment and governance features, and maintaining clean automated tests at every step, TrustFix can reach a robust, production-ready state.
+## 14. Phase 2 — Authentication & Security Hardening (Completed)
 
-> **Status:** Phase 1 Audit Complete. Awaiting user instruction before commencing Phase 2.
+### 14.1 Summary of Completed Tasks
+
+1. **Task 1 — Standardized Backend Port to 8085:**
+   - Standardized the TrustFix backend on port `8085` uniformly across `backend/Dockerfile`, `docker-compose.yml`, `docs/API_CONTRACT.md`, `README.md`, `frontend/.env`, `frontend/.env.example`, and all verification scripts.
+   - Verified that zero outdated active `8080` references remain in the repository.
+
+2. **Task 2 — Removed Hardcoded Security Secrets:**
+   - Enforced dynamic JWT secret loading via `JWT_SECRET` environment variable with mandatory 256-bit (32 byte minimum) secret strength.
+   - In production profile (`prod` or `production`), the application halts immediately with clear `IllegalStateException` on startup if `jwt.secret` is missing or insecure.
+   - Admin credentials (`ADMIN_EMAIL`, `ADMIN_PASSWORD`) are loaded strictly from the environment; in production, absence of an explicit password prevents insecure default account creation.
+   - Documented all security variables with dummy placeholders in `backend/.env.example`.
+
+3. **Task 3 — Strong Password Validation Policy:**
+   - Created centralized `PasswordValidator` enforcing minimum 8 characters, at least 1 uppercase letter, 1 lowercase letter, and 1 numeric digit.
+   - Applied Bean Validation `@Pattern` and `@Size(min = 8)` to `RegisterRequest`.
+   - Created `ChangePasswordRequest` DTO and implemented password change endpoint `PUT /api/users/{id}/password`.
+   - Validated password complexity in `AuthService.register()` and `UserService.changePassword()`.
+   - Created comprehensive unit tests in `PasswordValidatorTest` covering valid passwords, short passwords, missing uppercase, missing lowercase, missing numbers, and empty strings.
+
+4. **Task 4 — Fixed BCrypt Password Handling:**
+   - Eliminated the fragile `isBCryptHashed` string check (length == 60, startsWith `$2a$`).
+   - In `UserService.updateUser()`, new passwords are only re-encoded if changed; if null or unchanged, existing hash is safely preserved.
+   - Added regression unit tests in `UserServiceTest` validating password hash preservation on profile updates and password changes.
+
+5. **Task 5 — Resolved DataInitializer / E2E Conflict:**
+   - Removed destructive SQL `DELETE` queries that previously purged test users on startup.
+   - Seeded test accounts (`testcustomer@gmail.com` / `Test@123`, `testprovider@gmail.com` / `Test@123`) and demo catalog conditionally in non-production environments when `app.seed-demo-data=true`.
+   - Seeded standard test administrator (`admin@trustfix.com` / `Admin@123`) alongside custom administrator emails in development environments.
+
+6. **Task 6 — Login & Register Rate Limiting:**
+   - Implemented `RateLimiter` interface, `InMemoryRateLimiter`, and `RateLimitingFilter` targeting `POST /api/auth/login` and `POST /api/auth/register`.
+   - Configurable limits via `app.rate-limit.*` (defaults: 10 login attempts/60s, 5 registrations/60s).
+   - Anonymizes client IP addresses using SHA-256 hashing.
+   - Returns standard HTTP 429 Too Many Requests with `Retry-After` header and structured JSON error response.
+   - Tested rate-limit acquisition, windows, and filter HTTP responses via `InMemoryRateLimiterTest` and `RateLimitingFilterTest`.
+
+7. **Task 7 — CORS Hardening:**
+   - Removed overly broad wildcard origin `https://*.vercel.app`.
+   - Made allowed origins configurable via `app.cors.allowed-origins` (defaulting to localhost ports `3000` and `5173`).
+   - In production profile, strictly restricts allowed origins to explicitly configured hostnames.
+   - Configured custom 401 `AuthenticationEntryPoint` and 403 `AccessDeniedHandler` returning clean JSON error responses instead of empty responses.
+
+8. **Task 8 — Authentication & Authorization Verification:**
+   - Validated that unauthenticated access to protected endpoints is rejected with HTTP 401 Unauthorized.
+   - Verified IDOR safeguards in `SecurityUtil`: customers cannot modify another customer's bookings or addresses; providers cannot view or mutate other providers' profiles or bookings.
+   - Verified that admin endpoints (`/api/users/role/**`, `/api/bookings/status/**`) strictly require `ROLE_ADMIN`.
+   - Created `SecurityAuthorizationIntegrationTest` asserting authorization boundaries.
+
+### 14.2 Verification & Test Results
+
+* **Backend Tests (`./mvnw test`):**
+  - Total tests run: **112**
+  - Passing: **112**
+  - Failures: **0**
+  - Errors: **0**
+  - Regressions: **None** (all 84 original tests + 28 new unit/integration tests passing)
+* **Frontend Build (`npm run build`):**
+  - Built cleanly in 11.04s (`dist/assets/index-CiPUEaCA.css`, `dist/assets/index-wlcbhNJ2.js`).
+* **End-to-End Verification (`test_e2e.ps1`):**
+  - [1/7] Health check UP (MySQL connection active)
+  - [2/7] Catalog active (8 categories, 29 services)
+  - [3/7] Verified providers query (3 providers)
+  - [4/7] Customer login & booking creation (Ref: TF-095EC304, Status: PENDING)
+  - [5/7] Provider login & full lifecycle transition (PENDING -> CONFIRMED -> IN_PROGRESS -> COMPLETED)
+  - [6/7] Customer review submission (5 Stars)
+  - [7/7] Admin governance metrics query (Active customers & completed platform bookings verified)
+  - Status: **ALL 7/7 FLOWS PASSED AND PERSISTED IN MYSQL**
+
+---
+
+## 15. Audit Conclusion & Sign-Off
+
+> **Status:** Phase 2 Complete. All authentication and security hardening requirements verified. Awaiting instructions for Phase 3.

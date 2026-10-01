@@ -21,9 +21,25 @@ public class JwtService {
     private final long expirationTime;
 
     public JwtService(
-            @Value("${jwt.secret:TrustFixSecretKeyForJwtAuthentication2026Secure}") String secretKey,
-            @Value("${jwt.expiration-ms:86400000}") long expirationTime) {
-        this.key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+            @Value("${jwt.secret:}") String secretKey,
+            @Value("${jwt.expiration-ms:86400000}") long expirationTime,
+            @Value("${spring.profiles.active:default}") String activeProfile) {
+        
+        String keyToUse = secretKey != null ? secretKey.trim() : "";
+        boolean isProduction = "prod".equalsIgnoreCase(activeProfile) || "production".equalsIgnoreCase(activeProfile);
+
+        if (keyToUse.isEmpty()) {
+            if (isProduction) {
+                throw new IllegalStateException("CRITICAL SECURITY ERROR: 'jwt.secret' (JWT_SECRET) is missing in production profile!");
+            }
+            keyToUse = "TrustFixDevOnlyEphemeralJwtSecretKeyForLocalTesting2026AtLeast32Bytes!";
+        } else if (keyToUse.length() < 32) {
+            throw new IllegalStateException("CRITICAL SECURITY ERROR: 'jwt.secret' (JWT_SECRET) must be at least 32 characters (256 bits) long.");
+        } else if (isProduction && keyToUse.contains("DevOnlyEphemeral")) {
+            throw new IllegalStateException("CRITICAL SECURITY ERROR: Ephemeral development JWT secret cannot be used in production profile!");
+        }
+
+        this.key = Keys.hmacShaKeyFor(keyToUse.getBytes(StandardCharsets.UTF_8));
         this.expirationTime = expirationTime;
     }
 

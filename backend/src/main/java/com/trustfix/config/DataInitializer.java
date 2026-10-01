@@ -1,16 +1,23 @@
 package com.trustfix.config;
 
+import com.trustfix.entity.Address;
 import com.trustfix.entity.Category;
+import com.trustfix.entity.ProviderProfile;
+import com.trustfix.entity.ProviderService;
 import com.trustfix.entity.Service;
 import com.trustfix.entity.User;
 import com.trustfix.entity.UserRole;
+import com.trustfix.entity.VerificationStatus;
+import com.trustfix.repository.AddressRepository;
 import com.trustfix.repository.CategoryRepository;
+import com.trustfix.repository.ProviderProfileRepository;
+import com.trustfix.repository.ProviderServiceRepository;
 import com.trustfix.repository.ServiceRepository;
 import com.trustfix.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,56 +33,46 @@ public class DataInitializer implements CommandLineRunner {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final ServiceRepository serviceRepository;
+    private final ProviderProfileRepository providerProfileRepository;
+    private final AddressRepository addressRepository;
+    private final ProviderServiceRepository providerServiceRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JdbcTemplate jdbcTemplate;
+
+    @Value("${admin.email:${ADMIN_EMAIL:admin@trustfix.com}}")
+    private String adminEmail;
+
+    @Value("${admin.password:${ADMIN_PASSWORD:}}")
+    private String adminPassword;
+
+    @Value("${app.seed-demo-data:${APP_SEED_DEMO_DATA:true}}")
+    private boolean seedDemoData;
+
+    @Value("${spring.profiles.active:default}")
+    private String activeProfile;
 
     public DataInitializer(UserRepository userRepository,
                            CategoryRepository categoryRepository,
                            ServiceRepository serviceRepository,
-                           PasswordEncoder passwordEncoder,
-                           JdbcTemplate jdbcTemplate) {
+                           ProviderProfileRepository providerProfileRepository,
+                           AddressRepository addressRepository,
+                           ProviderServiceRepository providerServiceRepository,
+                           PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.categoryRepository = categoryRepository;
         this.serviceRepository = serviceRepository;
+        this.providerProfileRepository = providerProfileRepository;
+        this.addressRepository = addressRepository;
+        this.providerServiceRepository = providerServiceRepository;
         this.passwordEncoder = passwordEncoder;
-        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
     @Transactional
     public void run(String... args) {
-        log.info("Checking and initializing TrustFix production catalog & security seed data...");
+        boolean isProduction = "prod".equalsIgnoreCase(activeProfile) || "production".equalsIgnoreCase(activeProfile);
+        log.info("Checking and initializing TrustFix service catalog & security seed data (profile={}, seedDemoData={})...", activeProfile, seedDemoData);
 
-        // 1. Purge legacy demo accounts using direct SQL to avoid cascade & orphan-removal issues
-        try {
-            jdbcTemplate.execute("DELETE r FROM reviews r JOIN users u ON r.customer_id = u.id WHERE u.email IN ('testprovider@gmail.com', 'testcustomer@gmail.com', 'priya.plumber@trustfix.com', 'amit.ac@trustfix.com', 'vikram.clean@trustfix.com', 'customer@trustfix.com', 'rajesh@trustfix.com', 'vikram@trustfix.com')");
-            jdbcTemplate.execute("DELETE r FROM reviews r JOIN provider_profiles pp ON r.provider_id = pp.id JOIN users u ON pp.user_id = u.id WHERE u.email IN ('testprovider@gmail.com', 'testcustomer@gmail.com', 'priya.plumber@trustfix.com', 'amit.ac@trustfix.com', 'vikram.clean@trustfix.com', 'customer@trustfix.com', 'rajesh@trustfix.com', 'vikram@trustfix.com')");
-            jdbcTemplate.execute("DELETE b FROM bookings b JOIN users u ON b.customer_id = u.id WHERE u.email IN ('testprovider@gmail.com', 'testcustomer@gmail.com', 'priya.plumber@trustfix.com', 'amit.ac@trustfix.com', 'vikram.clean@trustfix.com', 'customer@trustfix.com', 'rajesh@trustfix.com', 'vikram@trustfix.com')");
-            jdbcTemplate.execute("DELETE b FROM bookings b JOIN provider_profiles pp ON b.provider_id = pp.id JOIN users u ON pp.user_id = u.id WHERE u.email IN ('testprovider@gmail.com', 'testcustomer@gmail.com', 'priya.plumber@trustfix.com', 'amit.ac@trustfix.com', 'vikram.clean@trustfix.com', 'customer@trustfix.com', 'rajesh@trustfix.com', 'vikram@trustfix.com')");
-            jdbcTemplate.execute("DELETE ps FROM provider_services ps JOIN provider_profiles pp ON ps.provider_id = pp.id JOIN users u ON pp.user_id = u.id WHERE u.email IN ('testprovider@gmail.com', 'testcustomer@gmail.com', 'priya.plumber@trustfix.com', 'amit.ac@trustfix.com', 'vikram.clean@trustfix.com', 'customer@trustfix.com', 'rajesh@trustfix.com', 'vikram@trustfix.com')");
-            jdbcTemplate.execute("DELETE pp FROM provider_profiles pp JOIN users u ON pp.user_id = u.id WHERE u.email IN ('testprovider@gmail.com', 'testcustomer@gmail.com', 'priya.plumber@trustfix.com', 'amit.ac@trustfix.com', 'vikram.clean@trustfix.com', 'customer@trustfix.com', 'rajesh@trustfix.com', 'vikram@trustfix.com')");
-            jdbcTemplate.execute("DELETE a FROM addresses a JOIN users u ON a.user_id = u.id WHERE u.email IN ('testprovider@gmail.com', 'testcustomer@gmail.com', 'priya.plumber@trustfix.com', 'amit.ac@trustfix.com', 'vikram.clean@trustfix.com', 'customer@trustfix.com', 'rajesh@trustfix.com', 'vikram@trustfix.com')");
-            jdbcTemplate.execute("DELETE FROM users WHERE email IN ('testprovider@gmail.com', 'testcustomer@gmail.com', 'priya.plumber@trustfix.com', 'amit.ac@trustfix.com', 'vikram.clean@trustfix.com', 'customer@trustfix.com', 'rajesh@trustfix.com', 'vikram@trustfix.com')");
-        } catch (Exception e) {
-            log.warn("Demo cleanup SQL notice: {}", e.getMessage());
-        }
-
-        // 2. Initialize Admin Account with standard and custom fallback
-        String customAdminEmail = System.getenv("ADMIN_EMAIL");
-        String adminPassword = System.getenv("ADMIN_PASSWORD");
-        if (adminPassword == null || adminPassword.isBlank()) {
-            adminPassword = "231182157800100950";
-        }
-
-        initUser("TrustFix Admin", "admin@trustfix.com", "+919820100001", adminPassword, UserRole.ADMIN);
-        if (customAdminEmail != null && !customAdminEmail.isBlank() && !customAdminEmail.equalsIgnoreCase("admin@trustfix.com")) {
-            initUser("Pushpendra Yadav (Admin)", customAdminEmail, "+919820100099", adminPassword, UserRole.ADMIN);
-        }
-
-        // Also ensure pushpendraydv1010@gmail.com has ADMIN role and password
-        initUser("Pushpendra Yadav (Admin)", "pushpendraydv1010@gmail.com", "+919820100099", adminPassword, UserRole.ADMIN);
-
-        // 3. Initialize Categories & Services Catalog
+        // 1. Initialize Standard Category Catalog
         Category electrical = initCategory("Electrical", "Certified electricians for wiring, fixtures, switchboards, and electrical repairs.", "⚡");
         Category plumbing = initCategory("Plumbing", "Expert plumbers for tap leaks, bathroom fixtures, drain cleaning & piping.", "🚰");
         Category cleaning = initCategory("Cleaning", "Professional home deep cleaning, kitchen sanitization & bathroom scrubbing.", "✨");
@@ -83,7 +80,8 @@ public class DataInitializer implements CommandLineRunner {
         Category applianceRepair = initCategory("Appliance Repair", "Skilled technicians for washing machines, refrigerators, and microwaves.", "🛠️");
         Category painting = initCategory("Painting", "Interior & exterior house painting, wall waterproofing, and color consultation.", "🎨");
 
-        initService(electrical, "Electrical Repair & Inspection", "Complete inspection of switches, MCB trips, wiring issues, and sockets.", new BigDecimal("499.00"), 60, "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&auto=format&fit=crop&q=80");
+        // 2. Initialize Standard Service Catalog
+        Service serviceElectrical = initService(electrical, "Electrical Repair & Inspection", "Complete inspection of switches, MCB trips, wiring issues, and sockets.", new BigDecimal("499.00"), 60, "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&auto=format&fit=crop&q=80");
         initService(electrical, "Switchboard & Socket Installation", "Installation of modular switchboards, high-power appliance points, and MCBs.", new BigDecimal("349.00"), 45, "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=500&auto=format&fit=crop&q=80");
         initService(plumbing, "Plumbing Repair & Leakage Fix", "Inspection and repair of leaking taps, pipe joints, flush valves, and drains.", new BigDecimal("399.00"), 45, "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=500&auto=format&fit=crop&q=80");
         initService(plumbing, "Bathroom Fixture Installation", "Installation of showers, washbasins, mixer taps, and health faucets.", new BigDecimal("599.00"), 60, "https://images.unsplash.com/photo-1507652313519-d4e9174996dd?w=500&auto=format&fit=crop&q=80");
@@ -94,7 +92,69 @@ public class DataInitializer implements CommandLineRunner {
         initService(applianceRepair, "Washing Machine Diagnostic & Repair", "Motor inspection, drum rotation fix, water inlet valve and PCB troubleshooting.", new BigDecimal("499.00"), 60, "https://images.unsplash.com/photo-1610557892470-55d9e80c0bce?w=500&auto=format&fit=crop&q=80");
         initService(painting, "Interior Wall Painting & Touch-up", "Premium emulsion wall painting with surface putty prep and roller finish.", new BigDecimal("1299.00"), 240, "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=500&auto=format&fit=crop&q=80");
 
+        // 3. Admin Account Initialization
+        String effectiveAdminPass = adminPassword;
+        if ((effectiveAdminPass == null || effectiveAdminPass.isBlank()) && !isProduction) {
+            // Safe non-production development fallback matching E2E verification suites
+            effectiveAdminPass = "Admin@123";
+        }
+
+        if (effectiveAdminPass != null && !effectiveAdminPass.isBlank()) {
+            initUser("TrustFix Admin", adminEmail, "+919820100001", effectiveAdminPass, UserRole.ADMIN);
+            log.info("TrustFix Admin account ensured: {}", adminEmail);
+            if (!"admin@trustfix.com".equalsIgnoreCase(adminEmail) && !isProduction) {
+                initUser("TrustFix System Admin", "admin@trustfix.com", "+919820100002", "Admin@123", UserRole.ADMIN);
+                log.info("Standard test admin ensured: admin@trustfix.com");
+            }
+        } else {
+            log.warn("No ADMIN_PASSWORD configured in production profile. Skipping automatic admin provisioning.");
+        }
+
+        // 4. Seed Demo & E2E Accounts (Development/Testing Only)
+        if (seedDemoData && !isProduction) {
+            seedDevelopmentAccounts(serviceElectrical);
+        }
+
         log.info("TrustFix initialization completed successfully.");
+    }
+
+    private void seedDevelopmentAccounts(Service serviceElectrical) {
+        // Seed Customer Account
+        User customer = initUser("Test Customer", "testcustomer@gmail.com", "+919820100010", "Test@123", UserRole.CUSTOMER);
+        if (addressRepository.findByUserId(customer.getId()).isEmpty()) {
+            Address address = new Address(customer, "Flat 101, Palm Grove", "Mumbai", "Maharashtra", "400053");
+            address.setAddressLine2("Andheri West");
+            address.setLandmark("Near Metro Station");
+            address.setLatitude(19.1136);
+            address.setLongitude(72.8697);
+            address.setDefaultAddress(true);
+            addressRepository.save(address);
+        }
+
+        // Seed Verified Provider Account
+        User providerUser = initUser("Test Provider", "testprovider@gmail.com", "+919820100020", "Test@123", UserRole.PROVIDER);
+        ProviderProfile profile = providerProfileRepository.findByUserId(providerUser.getId()).orElseGet(() -> {
+            ProviderProfile p = new ProviderProfile(providerUser, "Apex Home Care Specialist", 7);
+            p.setBio("Certified master technician providing prompt home repairs with 7+ years of experience.");
+            p.setCity("Mumbai");
+            p.setState("Maharashtra");
+            p.setPostalCode("400053");
+            p.setLatitude(19.1136);
+            p.setLongitude(72.8697);
+            p.setServiceRadiusKm(30.0);
+            p.setAvailable(true);
+            p.setVerificationStatus(VerificationStatus.VERIFIED);
+            p.setRating(4.9);
+            p.setReviewCount(12);
+            return providerProfileRepository.save(p);
+        });
+
+        // Ensure provider offers at least one service
+        if (serviceElectrical != null && providerServiceRepository.findByProviderId(profile.getId()).isEmpty()) {
+            ProviderService ps = new ProviderService(profile, serviceElectrical, new BigDecimal("449.00"));
+            ps.setAvailable(true);
+            providerServiceRepository.save(ps);
+        }
     }
 
     private User initUser(String name, String email, String phone, String password, UserRole role) {

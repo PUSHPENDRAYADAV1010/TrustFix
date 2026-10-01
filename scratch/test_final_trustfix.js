@@ -3,8 +3,8 @@
  * Tests actual Spring Boot REST APIs against MySQL database.
  */
 
-const BASE_URL = 'http://localhost:8080/api';
-const ACTUATOR_URL = 'http://localhost:8080/actuator';
+const BASE_URL = 'http://localhost:8085/api';
+const ACTUATOR_URL = 'http://localhost:8085/actuator';
 
 let totalTests = 0;
 let passedTests = 0;

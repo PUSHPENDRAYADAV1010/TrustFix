@@ -52,6 +52,9 @@ public class AuthService {
             user.setRole(UserRole.CUSTOMER);
         }
 
+        // Validate strong password policy before encoding
+        com.trustfix.util.PasswordValidator.validate(user.getPassword());
+
         // Password is stored as BCrypt hash
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
