@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { userService } from '../../services/userService';
 import { bookingService } from '../../services/bookingService';
 import { DashboardHeader } from '../../components/dashboard/DashboardHeader';
 import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
+import { Modal } from '../../components/common/Modal';
 import { LoadingSpinner } from '../../components/common/FeedbackStates';
 import {
   User,
@@ -14,17 +15,20 @@ import {
   ShieldCheck,
   CheckCircle2,
   AlertCircle,
+  AlertTriangle,
   MapPin,
   Calendar,
   Lock,
   Bell,
   ExternalLink,
   Shield,
-  FileCheck
+  FileCheck,
+  Trash2
 } from 'lucide-react';
 
 export const CustomerProfilePage = () => {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, logout } = useAuth();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -44,6 +48,10 @@ export const CustomerProfilePage = () => {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+
+  // Account Deactivation State
+  const [showDeactivateModal, setShowDeactivateModal] = useState(false);
+  const [deactivating, setDeactivating] = useState(false);
 
   useEffect(() => {
     const fetchAccountData = async () => {
@@ -93,6 +101,22 @@ export const CustomerProfilePage = () => {
       setError(err.message || 'Failed to update profile.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDeactivateAccount = async () => {
+    setDeactivating(true);
+    setError('');
+    try {
+      await userService.deleteAccount(user.id);
+      setShowDeactivateModal(false);
+      await logout();
+      navigate('/login');
+    } catch (err) {
+      setError(err.message || 'Failed to deactivate account.');
+      setShowDeactivateModal(false);
+    } finally {
+      setDeactivating(false);
     }
   };
 
@@ -344,8 +368,56 @@ export const CustomerProfilePage = () => {
               </div>
             </div>
 
+            {/* Danger Zone: Account Deactivation */}
+            <div className="card" style={{ padding: '1.75rem', backgroundColor: 'var(--white)', border: '1px solid var(--danger-200)' }}>
+              <div className="flex items-center gap-2 mb-2">
+                <Trash2 size={18} color="var(--danger-600)" />
+                <h4 style={{ fontSize: '1.05rem', fontWeight: 750, margin: 0, color: 'var(--danger-700)' }}>
+                  Deactivate Account
+                </h4>
+              </div>
+              <p style={{ fontSize: 'var(--font-size-xs)', color: 'var(--neutral-600)', lineHeight: 1.5, marginBottom: '1rem' }}>
+                Deactivating your account will immediately disable your access, cancel unfulfilled bookings, and preserve your past service receipts for audit records.
+              </p>
+              <Button
+                type="button"
+                variant="danger"
+                style={{ width: '100%', fontSize: '0.8125rem', padding: '0.5rem 1rem' }}
+                onClick={() => setShowDeactivateModal(true)}
+              >
+                Deactivate My Account
+              </Button>
+            </div>
+
           </div>
         </div>
+
+        {/* Account Deactivation Modal */}
+        <Modal
+          isOpen={showDeactivateModal}
+          onClose={() => setShowDeactivateModal(false)}
+          title="Confirm Account Deactivation"
+          footer={
+            <>
+              <Button variant="secondary" onClick={() => setShowDeactivateModal(false)}>
+                Keep My Account
+              </Button>
+              <Button variant="danger" loading={deactivating} onClick={handleDeactivateAccount}>
+                Yes, Deactivate Account
+              </Button>
+            </>
+          }
+        >
+          <div>
+            <div className="alert alert-danger mb-4">
+              <AlertTriangle size={18} />
+              <span>This action will deactivate your TrustFix customer account.</span>
+            </div>
+            <p className="text-xs text-muted">
+              You will be signed out immediately and will not be able to log in with these credentials until an administrator re-activates your account. Are you sure you want to proceed?
+            </p>
+          </div>
+        </Modal>
 
       </div>
     </div>

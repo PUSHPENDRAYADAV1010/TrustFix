@@ -200,6 +200,22 @@ export const BookingDetailsPage = () => {
           </div>
         </div>
 
+        {booking.status === 'CANCELLED' && (
+          <div className="alert alert-warning mb-6" style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+            <AlertCircle size={20} color="var(--warning-700)" style={{ flexShrink: 0, marginTop: '2px' }} />
+            <div>
+              <strong style={{ fontSize: '0.9375rem', display: 'block', color: 'var(--neutral-900)' }}>
+                This booking has been cancelled
+              </strong>
+              <span className="text-xs text-muted block mt-1">
+                {booking.cancellationReason
+                  ? `Reason: "${booking.cancellationReason}"`
+                  : 'No specific cancellation reason was provided.'}
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* 2-Column Main Grid */}
         <div className="booking-details-grid">
           {/* LEFT: Appointment Info & Visual Timeline */}

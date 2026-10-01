@@ -90,7 +90,7 @@ public class ServiceController {
     @PutMapping("/{id}")
     public ResponseEntity<ServiceResponse> updateService(
             @PathVariable Long id,
-            @RequestBody ServiceRequest request) {
+            @Valid @RequestBody ServiceRequest request) {
         Service updatedService = serviceMapper.toEntity(request);
         Service service = serviceCatalogService.updateService(id, updatedService);
         return ResponseEntity.ok(serviceMapper.toResponse(service));

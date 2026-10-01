@@ -80,7 +80,7 @@ public class AddressController {
     @PutMapping("/{id}")
     public ResponseEntity<AddressResponse> updateAddress(
             @PathVariable Long id,
-            @RequestBody AddressRequest request) {
+            @Valid @RequestBody AddressRequest request) {
         Address updatedAddress = addressMapper.toEntity(request);
         Address address = addressService.updateAddress(id, updatedAddress);
         return ResponseEntity.ok(addressMapper.toResponse(address));

@@ -193,4 +193,45 @@ class BookingControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1));
     }
+
+    @Test
+    void cancelBooking_WithReasonBody_Returns200() throws Exception {
+        sampleBooking.setStatus(BookingStatus.CANCELLED);
+        sampleBooking.setCancellationReason("Need to reschedule for next week");
+        when(bookingService.cancelBooking(eq(1L), eq("Need to reschedule for next week"))).thenReturn(sampleBooking);
+
+        mockMvc.perform(put("/api/bookings/1/cancel")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"reason\": \"Need to reschedule for next week\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("CANCELLED"))
+                .andExpect(jsonPath("$.cancellationReason").value("Need to reschedule for next week"));
+    }
+
+    @Test
+    void cancelBooking_WithReasonParam_Returns200() throws Exception {
+        sampleBooking.setStatus(BookingStatus.CANCELLED);
+        sampleBooking.setCancellationReason("Customer requested cancellation");
+        when(bookingService.cancelBooking(eq(1L), eq("Customer requested cancellation"))).thenReturn(sampleBooking);
+
+        mockMvc.perform(put("/api/bookings/1/cancel")
+                        .param("reason", "Customer requested cancellation"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("CANCELLED"))
+                .andExpect(jsonPath("$.cancellationReason").value("Customer requested cancellation"));
+    }
+
+    @Test
+    void updateBookingStatus_WithReasonParam_Returns200() throws Exception {
+        sampleBooking.setStatus(BookingStatus.CANCELLED);
+        sampleBooking.setCancellationReason("Emergency travel");
+        when(bookingService.updateBookingStatus(eq(1L), eq(BookingStatus.CANCELLED), eq("Emergency travel"))).thenReturn(sampleBooking);
+
+        mockMvc.perform(put("/api/bookings/1/status")
+                        .param("status", "CANCELLED")
+                        .param("reason", "Emergency travel"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("CANCELLED"))
+                .andExpect(jsonPath("$.cancellationReason").value("Emergency travel"));
+    }
 }

@@ -105,8 +105,23 @@ public class BookingController {
     @PutMapping("/{id}/status")
     public ResponseEntity<BookingResponse> updateBookingStatus(
             @PathVariable Long id,
-            @RequestParam BookingStatus status) {
-        Booking updatedBooking = bookingService.updateBookingStatus(id, status);
+            @RequestParam BookingStatus status,
+            @RequestParam(required = false) String reason,
+            @RequestParam(required = false) String cancellationReason) {
+        String effectiveReason = reason != null ? reason : cancellationReason;
+        Booking updatedBooking = (effectiveReason != null)
+                ? bookingService.updateBookingStatus(id, status, effectiveReason)
+                : bookingService.updateBookingStatus(id, status);
+        return ResponseEntity.ok(bookingMapper.toResponse(updatedBooking));
+    }
+
+    @PutMapping("/{id}/cancel")
+    public ResponseEntity<BookingResponse> cancelBooking(
+            @PathVariable Long id,
+            @Valid @RequestBody(required = false) com.trustfix.dto.booking.CancellationRequest request,
+            @RequestParam(required = false) String reason) {
+        String effectiveReason = request != null && request.getReason() != null ? request.getReason() : reason;
+        Booking updatedBooking = bookingService.cancelBooking(id, effectiveReason);
         return ResponseEntity.ok(bookingMapper.toResponse(updatedBooking));
     }
 

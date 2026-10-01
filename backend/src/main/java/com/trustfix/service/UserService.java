@@ -127,11 +127,23 @@ public class UserService {
     }
 
     public void deleteUser(Long id) {
-        if (!securityUtil.isAdmin()) {
-            throw new ForbiddenException("Only administrators can delete user accounts");
-        }
+        securityUtil.verifyUserOwnershipOrAdmin(id);
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + id));
-        userRepository.delete(user);
+
+        if (!user.isActive()) {
+            throw new BadRequestException("Account is already deactivated");
+        }
+
+        boolean hasDependencies = (user.getCustomerBookings() != null && !user.getCustomerBookings().isEmpty())
+                || (user.getReviews() != null && !user.getReviews().isEmpty())
+                || !securityUtil.isAdmin();
+
+        if (hasDependencies) {
+            user.setActive(false);
+            userRepository.save(user);
+        } else {
+            userRepository.delete(user);
+        }
     }
 }

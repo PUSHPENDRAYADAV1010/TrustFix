@@ -107,4 +107,13 @@ class SecurityAuthorizationIntegrationTest {
         mockMvc.perform(get("/api/services"))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    @DisplayName("Unauthenticated delete request should return 401 Unauthorized")
+    void unauthenticatedDelete_Returns401() throws Exception {
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete("/api/users/1"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.error").value("Unauthorized"));
+    }
 }
