@@ -85,13 +85,12 @@ public class SecurityConfig {
             }
         }
 
-        // In non-production profiles, allow local development ports
         if (!isProduction) {
             List<String> devOrigins = List.of(
-                "http://localhost:3000",
-                "http://localhost:5173",
-                "http://127.0.0.1:3000",
-                "http://127.0.0.1:5173"
+                    "http://localhost:*",
+                    "http://127.0.0.1:*",
+                    "https://localhost:*",
+                    "https://127.0.0.1:*"
             );
             for (String devOrigin : devOrigins) {
                 if (!origins.contains(devOrigin)) {
@@ -100,9 +99,11 @@ public class SecurityConfig {
             }
         }
 
-        configuration.setAllowedOrigins(origins);
+        configuration.setAllowedOrigins(origins.stream().filter(origin -> !origin.contains("*")).toList());
+        configuration.setAllowedOriginPatterns(origins.stream().filter(origin -> origin.contains("*")).toList());
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin", "X-CSRF-Token"));
+        configuration.setExposedHeaders(List.of("Authorization"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
@@ -146,6 +147,7 @@ public class SecurityConfig {
             )
 
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(
                     "/api/auth/**",
                     "/actuator/health",

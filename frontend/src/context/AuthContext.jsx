@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authService } from '../services/authService';
 import { providerService } from '../services/providerService';
+import { clearAuthStorage } from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -84,6 +85,10 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     try {
       const res = await authService.login({ email, password });
+      if (!res?.token) {
+        throw new Error('Login failed: missing token.');
+      }
+
       setUser(res.user);
       setToken(res.token);
 
@@ -110,7 +115,6 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await authService.register(userData);
       setUser(res.user);
-      setToken(res.token);
 
       if (res.user?.role === 'PROVIDER') {
         try {
@@ -133,12 +137,10 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     try {
       await authService.logout();
+      clearAuthStorage();
       setUser(null);
       setProviderProfile(null);
       setToken(null);
-      localStorage.removeItem('trustfix_user');
-      localStorage.removeItem('trustfix_provider_profile');
-      localStorage.removeItem('trustfix_token');
     } finally {
       setLoading(false);
     }
@@ -166,7 +168,7 @@ export const AuthProvider = ({ children }) => {
         logout,
         updateUser,
         updateProvider,
-        refreshProviderProfile
+        refreshProviderProfile,
       }}
     >
       {children}

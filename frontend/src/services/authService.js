@@ -1,31 +1,51 @@
-import apiClient from './api';
+import apiClient, { clearAuthStorage } from './api';
+
+const getTokenFromResponse = (payload) => {
+  const rawToken = payload?.token ?? payload?.accessToken ?? payload?.jwt ?? null;
+  return typeof rawToken === 'string' && rawToken.trim() ? rawToken.trim() : null;
+};
+
+const normalizeUser = (payload) => {
+  if (!payload || typeof payload !== 'object') {
+    return null;
+  }
+
+  return {
+    id: payload.userId ?? payload.id ?? null,
+    name: payload.name ?? '',
+    email: payload.email ?? '',
+    role: payload.role ?? 'CUSTOMER',
+  };
+};
 
 export const authService = {
   // Real API login using Spring Boot /api/auth/login
   login: async ({ email, password }) => {
     try {
       const response = await apiClient.post('/auth/login', { email, password });
-      const data = response.data;
-      const token = data.token || data.message;
-      const user = {
-        id: data.userId,
-        name: data.name,
-        email: data.email,
-        role: data.role
-      };
-      if (token) {
-        localStorage.setItem('trustfix_token', token);
+      const data = response.data ?? {};
+      const token = getTokenFromResponse(data);
+
+      if (!token) {
+        throw new Error('Authentication failed: no token returned by server.');
       }
-      if (user) {
-        localStorage.setItem('trustfix_user', JSON.stringify(user));
+
+      const user = normalizeUser(data);
+      if (!user?.email) {
+        throw new Error('Authentication failed: invalid user payload returned by server.');
       }
+
+      localStorage.setItem('trustfix_token', token);
+      localStorage.setItem('trustfix_user', JSON.stringify(user));
+
       return {
         success: true,
         user,
         token,
-        message: 'Login successful'
+        message: 'Login successful',
       };
     } catch (error) {
+      clearAuthStorage();
       const errorMsg = error.response?.data?.message || error.response?.data?.error || 'Invalid email or password. Please try again.';
       throw new Error(errorMsg);
     }
@@ -42,32 +62,36 @@ export const authService = {
         password,
         role: userRole,
       });
+
       const user = {
-        id: response.data.id,
-        name: response.data.name,
-        email: response.data.email,
-        phone: response.data.phone,
-        role: response.data.role
+        id: response.data?.id ?? null,
+        name: response.data?.name ?? name,
+        email: response.data?.email ?? email,
+        phone: response.data?.phone ?? phone,
+        role: response.data?.role ?? userRole,
       };
 
       try {
         const loginResponse = await apiClient.post('/auth/login', { email, password });
-        const token = loginResponse.data.token || loginResponse.data.message;
-        if (token) localStorage.setItem('trustfix_token', token);
-      } catch {}
+        const token = getTokenFromResponse(loginResponse.data ?? {});
+        if (token) {
+          localStorage.setItem('trustfix_token', token);
+        }
+      } catch (loginError) {
+        console.warn('[AuthService] Auto-login after registration failed:', loginError);
+      }
 
       localStorage.setItem('trustfix_user', JSON.stringify(user));
       return { success: true, user, message: 'Registration successful' };
     } catch (error) {
+      clearAuthStorage();
       const errorMsg = error.response?.data?.message || error.response?.data?.error || 'Registration failed. Please try again.';
       throw new Error(errorMsg);
     }
   },
 
   logout: async () => {
-    localStorage.removeItem('trustfix_token');
-    localStorage.removeItem('trustfix_user');
-    localStorage.removeItem('trustfix_provider_profile');
+    clearAuthStorage();
     return { success: true };
-  }
+  },
 };

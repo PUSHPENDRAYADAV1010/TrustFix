@@ -37,20 +37,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain)
             throws ServletException, IOException {
 
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         final String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        String token = authHeader.substring(7).trim();
+        if (token.isEmpty()) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         String email = null;
-        String token = null;
-
-        // Authorization: Bearer <token>
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            token = authHeader.substring(7);
-
-            try {
-                email = jwtService.extractEmail(token);
-            } catch (Exception e) {
-                // Invalid token — request will continue without authentication
-            }
+        try {
+            email = jwtService.extractEmail(token);
+        } catch (Exception e) {
+            SecurityContextHolder.clearContext();
+            filterChain.doFilter(request, response);
+            return;
         }
 
         if (email != null
@@ -58,32 +68,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             Optional<User> userOpt = userRepository.findByEmail(email);
 
-            if (userOpt.isPresent() && userOpt.get().isActive()) {
+            if (userOpt.isPresent() && userOpt.get().isActive() && jwtService.isTokenValid(token, email)) {
                 User user = userOpt.get();
+                SimpleGrantedAuthority authority =
+                        new SimpleGrantedAuthority("ROLE_" + user.getRole().name());
 
-                // If token email matches, double check validity
-                if (jwtService.isTokenValid(token, email)) {
-                    SimpleGrantedAuthority authority =
-                            new SimpleGrantedAuthority("ROLE_" + user.getRole().name());
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(
+                                user.getEmail(),
+                                null,
+                                List.of(authority)
+                        );
 
-                    UsernamePasswordAuthenticationToken authentication =
-                            new UsernamePasswordAuthenticationToken(
-                                    user.getEmail(),
-                                    null,
-                                    List.of(authority)
-                            );
+                authentication.setDetails(
+                        new WebAuthenticationDetailsSource()
+                                .buildDetails(request)
+                );
 
-                    authentication.setDetails(
-                            new WebAuthenticationDetailsSource()
-                                    .buildDetails(request)
-                    );
-
-                    SecurityContextHolder.getContext()
-                            .setAuthentication(authentication);
-                }
+                SecurityContextHolder.getContext()
+                        .setAuthentication(authentication);
+            } else {
+                SecurityContextHolder.clearContext();
             }
         }
 
         filterChain.doFilter(request, response);
     }
-}
+}
