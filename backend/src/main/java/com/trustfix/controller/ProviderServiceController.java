@@ -66,6 +66,15 @@ public class ProviderServiceController {
         return ResponseEntity.ok(providerServiceMapper.toResponse(updatedProviderService));
     }
 
+    @PutMapping("/provider/{providerId}/service/{serviceId}/status")
+    public ResponseEntity<ProviderServiceResponse> updateServiceAvailability(
+            @PathVariable Long providerId,
+            @PathVariable Long serviceId,
+            @RequestParam boolean available) {
+        ProviderService updatedProviderService = providerServiceService.updateServiceAvailability(providerId, serviceId, available);
+        return ResponseEntity.ok(providerServiceMapper.toResponse(updatedProviderService));
+    }
+
     @DeleteMapping("/provider/{providerId}/service/{serviceId}")
     public ResponseEntity<Void> removeServiceFromProvider(
             @PathVariable Long providerId,

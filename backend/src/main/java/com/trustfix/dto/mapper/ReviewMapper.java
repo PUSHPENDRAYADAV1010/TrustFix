@@ -11,7 +11,7 @@ public class ReviewMapper {
         if (review == null) {
             return null;
         }
-        return new ReviewResponse(
+        ReviewResponse response = new ReviewResponse(
                 review.getId(),
                 review.getBooking() != null ? review.getBooking().getId() : null,
                 review.getBooking() != null ? review.getBooking().getBookingReference() : null,
@@ -24,5 +24,9 @@ public class ReviewMapper {
                 review.getCreatedAt(),
                 review.getUpdatedAt()
         );
+        if (review.getBooking() != null && review.getBooking().getService() != null) {
+            response.setServiceName(review.getBooking().getService().getName());
+        }
+        return response;
     }
 }

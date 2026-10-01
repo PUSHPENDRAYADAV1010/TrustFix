@@ -16,6 +16,10 @@ public interface ProviderServiceRepository extends JpaRepository<ProviderService
 
     List<ProviderService> findByProviderId(Long providerId);
 
+    List<ProviderService> findByProviderIdAndAvailableTrue(Long providerId);
+
+    long countByProviderIdAndAvailableTrue(Long providerId);
+
     List<ProviderService> findByService(Service service);
 
     List<ProviderService> findByServiceId(Long serviceId);

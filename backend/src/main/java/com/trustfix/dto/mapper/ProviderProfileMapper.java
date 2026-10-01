@@ -44,6 +44,7 @@ public class ProviderProfileMapper {
                 profile.getBio(),
                 profile.getExperienceYears(),
                 profile.getVerificationStatus(),
+                profile.getRejectionReason(),
                 profile.getDocumentUrl(),
                 profile.getLatitude(),
                 profile.getLongitude(),

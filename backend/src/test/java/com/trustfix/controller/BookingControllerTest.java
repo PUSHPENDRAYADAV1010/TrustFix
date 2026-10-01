@@ -146,7 +146,7 @@ class BookingControllerTest {
 
     @Test
     void getBookingsByProvider_Success_Returns200() throws Exception {
-        when(bookingService.getBookingsByProvider(1L)).thenReturn(List.of(sampleBooking));
+        when(bookingService.getBookingsByProvider(eq(1L), any())).thenReturn(List.of(sampleBooking));
 
         mockMvc.perform(get("/api/bookings/provider/1"))
                 .andExpect(status().isOk())

@@ -117,7 +117,7 @@ class ProviderProfileControllerTest {
 
     @Test
     void updateVerificationStatus_Success_Returns200() throws Exception {
-        when(providerProfileService.updateVerificationStatus(1L, VerificationStatus.VERIFIED)).thenReturn(sampleProfile);
+        when(providerProfileService.updateVerificationStatus(eq(1L), eq(VerificationStatus.VERIFIED), any())).thenReturn(sampleProfile);
 
         mockMvc.perform(put("/api/providers/1/verify?status=VERIFIED"))
                 .andExpect(status().isOk())

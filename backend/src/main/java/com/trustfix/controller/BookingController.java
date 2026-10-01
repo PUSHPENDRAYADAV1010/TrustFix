@@ -85,8 +85,10 @@ public class BookingController {
     }
 
     @GetMapping("/provider/{providerId}")
-    public ResponseEntity<List<BookingResponse>> getBookingsByProvider(@PathVariable Long providerId) {
-        List<BookingResponse> bookings = bookingService.getBookingsByProvider(providerId)
+    public ResponseEntity<List<BookingResponse>> getBookingsByProvider(
+            @PathVariable Long providerId,
+            @RequestParam(required = false) BookingStatus status) {
+        List<BookingResponse> bookings = bookingService.getBookingsByProvider(providerId, status)
                 .stream()
                 .map(bookingMapper::toResponse)
                 .toList();

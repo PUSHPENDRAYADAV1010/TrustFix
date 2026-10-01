@@ -14,6 +14,7 @@ public class ProviderProfileResponse {
     private String bio;
     private Integer experienceYears;
     private VerificationStatus verificationStatus;
+    private String rejectionReason;
     private String documentUrl;
     private Double latitude;
     private Double longitude;
@@ -48,7 +49,7 @@ public class ProviderProfileResponse {
         this.updatedAt = updatedAt;
     }
 
-    public ProviderProfileResponse(Long id, Long userId, String userName, String userEmail, String userPhone, String businessName, String bio, Integer experienceYears, VerificationStatus verificationStatus, String documentUrl, Double latitude, Double longitude, Double serviceRadiusKm, String city, String state, String postalCode, Double rating, Integer reviewCount, boolean available, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public ProviderProfileResponse(Long id, Long userId, String userName, String userEmail, String userPhone, String businessName, String bio, Integer experienceYears, VerificationStatus verificationStatus, String rejectionReason, String documentUrl, Double latitude, Double longitude, Double serviceRadiusKm, String city, String state, String postalCode, Double rating, Integer reviewCount, boolean available, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.userId = userId;
         this.userName = userName;
@@ -58,6 +59,7 @@ public class ProviderProfileResponse {
         this.bio = bio;
         this.experienceYears = experienceYears;
         this.verificationStatus = verificationStatus;
+        this.rejectionReason = rejectionReason;
         this.documentUrl = documentUrl;
         this.latitude = latitude;
         this.longitude = longitude;
@@ -142,6 +144,14 @@ public class ProviderProfileResponse {
 
     public void setVerificationStatus(VerificationStatus verificationStatus) {
         this.verificationStatus = verificationStatus;
+    }
+
+    public String getRejectionReason() {
+        return rejectionReason;
+    }
+
+    public void setRejectionReason(String rejectionReason) {
+        this.rejectionReason = rejectionReason;
     }
 
     public String getDocumentUrl() {

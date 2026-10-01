@@ -11,6 +11,7 @@ public class ReviewResponse {
     private String customerName;
     private Long providerId;
     private String providerBusinessName;
+    private String serviceName;
     private Integer rating;
     private String comment;
     private LocalDateTime createdAt;
@@ -87,6 +88,14 @@ public class ReviewResponse {
 
     public void setProviderBusinessName(String providerBusinessName) {
         this.providerBusinessName = providerBusinessName;
+    }
+
+    public String getServiceName() {
+        return serviceName;
+    }
+
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
     }
 
     public Integer getRating() {

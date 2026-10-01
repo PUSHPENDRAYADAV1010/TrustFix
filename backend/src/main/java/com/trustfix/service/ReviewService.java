@@ -90,13 +90,13 @@ public class ReviewService {
         if (!providerProfileRepository.existsById(providerId)) {
             throw new ResourceNotFoundException("Provider profile not found with ID: " + providerId);
         }
-        return reviewRepository.findByProviderId(providerId);
+        return reviewRepository.findByProviderIdOrderByCreatedAtDesc(providerId);
     }
 
     @Transactional(readOnly = true)
     public List<Review> getReviewsByCustomerId(Long customerId) {
         securityUtil.verifyUserOwnershipOrAdmin(customerId);
-        return reviewRepository.findByCustomerId(customerId);
+        return reviewRepository.findByCustomerIdOrderByCreatedAtDesc(customerId);
     }
 
     private void updateProviderRatingStats(Long providerId) {

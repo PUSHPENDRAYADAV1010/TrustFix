@@ -122,11 +122,19 @@ public class BookingService {
 
     @Transactional(readOnly = true)
     public List<Booking> getBookingsByProvider(Long providerId) {
+        return getBookingsByProvider(providerId, null);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Booking> getBookingsByProvider(Long providerId, BookingStatus status) {
         securityUtil.verifyProviderOwnershipOrAdmin(providerId);
         if (!providerProfileRepository.existsById(providerId)) {
             throw new ResourceNotFoundException("Provider profile not found with ID: " + providerId);
         }
-        return bookingRepository.findByProviderId(providerId);
+        if (status != null) {
+            return bookingRepository.findByProviderIdAndStatusOrderByCreatedAtDesc(providerId, status);
+        }
+        return bookingRepository.findByProviderIdOrderByCreatedAtDesc(providerId);
     }
 
     @Transactional(readOnly = true)
@@ -166,6 +174,11 @@ public class BookingService {
                 throw new ForbiddenException("Customers cannot cancel a booking that is already in progress");
             }
         } else if (authenticatedUser.getRole() == UserRole.PROVIDER) {
+            ProviderProfile providerProfile = providerProfileRepository.findByUserId(authenticatedUser.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Provider profile not found for user ID: " + authenticatedUser.getId()));
+            if (providerProfile.getVerificationStatus() != com.trustfix.entity.VerificationStatus.VERIFIED) {
+                throw new ForbiddenException("Only verified providers can accept or update bookings");
+            }
             boolean isAssignedProvider = booking.getProvider() != null &&
                     booking.getProvider().getUser() != null &&
                     booking.getProvider().getUser().getId().equals(authenticatedUser.getId());

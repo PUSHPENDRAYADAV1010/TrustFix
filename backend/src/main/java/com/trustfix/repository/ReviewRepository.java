@@ -20,7 +20,11 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     List<Review> findByProviderId(Long providerId);
 
+    List<Review> findByProviderIdOrderByCreatedAtDesc(Long providerId);
+
     List<Review> findByCustomerId(Long customerId);
+
+    List<Review> findByCustomerIdOrderByCreatedAtDesc(Long customerId);
 
     boolean existsByBookingId(Long bookingId);
 }

@@ -52,6 +52,10 @@ public class ProviderProfile {
     @Column(name = "verification_status", nullable = false, length = 20)
     private VerificationStatus verificationStatus = VerificationStatus.PENDING;
 
+    @Size(max = 500, message = "Rejection reason cannot exceed 500 characters")
+    @Column(name = "rejection_reason", length = 500)
+    private String rejectionReason;
+
     @Size(max = 255, message = "Document URL cannot exceed 255 characters")
     @Column(name = "document_url")
     private String documentUrl;
@@ -170,6 +174,14 @@ public class ProviderProfile {
 
     public void setVerificationStatus(VerificationStatus verificationStatus) {
         this.verificationStatus = verificationStatus;
+    }
+
+    public String getRejectionReason() {
+        return rejectionReason;
+    }
+
+    public void setRejectionReason(String rejectionReason) {
+        this.rejectionReason = rejectionReason;
     }
 
     public String getDocumentUrl() {

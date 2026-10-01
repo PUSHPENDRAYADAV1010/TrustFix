@@ -4,6 +4,9 @@ import com.trustfix.dto.mapper.ProviderProfileMapper;
 import com.trustfix.dto.provider.ProviderLocationResponse;
 import com.trustfix.dto.provider.ProviderProfileRequest;
 import com.trustfix.dto.provider.ProviderProfileResponse;
+import com.trustfix.dto.provider.ProviderDashboardResponse;
+import com.trustfix.dto.provider.ProviderStatsResponse;
+import com.trustfix.dto.provider.ProviderVerificationRequest;
 import com.trustfix.entity.ProviderProfile;
 import com.trustfix.entity.VerificationStatus;
 import com.trustfix.service.ProviderProfileService;
@@ -104,11 +107,41 @@ public class ProviderProfileController {
         return ResponseEntity.ok(providerProfileMapper.toResponse(profile));
     }
 
+    @PutMapping("/{id}/availability")
+    public ResponseEntity<ProviderProfileResponse> updateAvailability(
+            @PathVariable Long id,
+            @RequestParam boolean available) {
+        ProviderProfile profile = providerProfileService.updateAvailability(id, available);
+        return ResponseEntity.ok(providerProfileMapper.toResponse(profile));
+    }
+
     @PutMapping("/{id}/verify")
     public ResponseEntity<ProviderProfileResponse> updateVerificationStatus(
             @PathVariable Long id,
-            @RequestParam VerificationStatus status) {
-        ProviderProfile profile = providerProfileService.updateVerificationStatus(id, status);
+            @RequestParam(required = false) VerificationStatus status,
+            @RequestParam(required = false) String rejectionReason,
+            @Valid @RequestBody(required = false) ProviderVerificationRequest request) {
+        VerificationStatus targetStatus = request != null && request.getStatus() != null ? request.getStatus() : status;
+        String targetReason = request != null && request.getRejectionReason() != null ? request.getRejectionReason() : rejectionReason;
+        ProviderProfile profile = providerProfileService.updateVerificationStatus(id, targetStatus, targetReason);
         return ResponseEntity.ok(providerProfileMapper.toResponse(profile));
+    }
+
+    @PutMapping("/{id}/reapply")
+    public ResponseEntity<ProviderProfileResponse> reapplyForVerification(@PathVariable Long id) {
+        ProviderProfile profile = providerProfileService.reapplyForVerification(id);
+        return ResponseEntity.ok(providerProfileMapper.toResponse(profile));
+    }
+
+    @GetMapping("/{id}/dashboard")
+    public ResponseEntity<ProviderDashboardResponse> getProviderDashboard(@PathVariable Long id) {
+        ProviderDashboardResponse dashboard = providerProfileService.getProviderDashboard(id);
+        return ResponseEntity.ok(dashboard);
+    }
+
+    @GetMapping("/{id}/stats")
+    public ResponseEntity<ProviderStatsResponse> getProviderStats(@PathVariable Long id) {
+        ProviderStatsResponse stats = providerProfileService.getProviderStats(id);
+        return ResponseEntity.ok(stats);
     }
 }
