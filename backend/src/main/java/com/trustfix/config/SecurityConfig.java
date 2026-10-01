@@ -167,7 +167,7 @@ public class SecurityConfig {
                 ).permitAll()
                 .requestMatchers("/api/users/role/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/users").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/users", "/api/users/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/users").hasRole("ADMIN")
                 .requestMatchers("/api/providers/*/verify").hasRole("ADMIN")
                 .requestMatchers("/api/bookings/status/**", "/api/bookings/*/assign-provider").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/categories", "/api/categories/**", "/api/services", "/api/services/**").hasRole("ADMIN")

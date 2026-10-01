@@ -230,6 +230,22 @@ export const MyBookingsPage = () => {
                   </div>
                 </div>
 
+                {b.status === 'CANCELLED' && b.cancellationReason && (
+                  <div
+                    style={{
+                      backgroundColor: 'var(--neutral-100)',
+                      borderLeft: '3px solid var(--danger-500)',
+                      padding: '6px 12px',
+                      borderRadius: 'var(--radius-sm)',
+                      marginBottom: '0.75rem',
+                      fontSize: '0.75rem',
+                      color: 'var(--neutral-700)',
+                    }}
+                  >
+                    <strong>Cancelled:</strong> {b.cancellationReason}
+                  </div>
+                )}
+
                 {/* Actions Row */}
                 <div className="flex items-center justify-between flex-wrap gap-2 pt-2 border-top" style={{ borderTop: '1px solid var(--neutral-200)' }}>
                   <div className="flex items-center gap-2 text-xs text-muted">

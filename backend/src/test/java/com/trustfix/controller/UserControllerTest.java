@@ -160,6 +160,23 @@ class UserControllerTest {
     }
 
     @Test
+    void updateUser_InvalidEmail_Returns400() throws Exception {
+        String invalidUserJson = """
+                {
+                    "name": "Rahul Sharma",
+                    "email": "not-a-valid-email",
+                    "role": "CUSTOMER"
+                }
+                """;
+
+        mockMvc.perform(put("/api/users/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidUserJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Validation Failed"));
+    }
+
+    @Test
     void deleteUser_Success_Returns204() throws Exception {
         doNothing().when(userService).deleteUser(1L);
 

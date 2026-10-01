@@ -60,6 +60,10 @@ public class BookingService {
         Service service = serviceRepository.findById(serviceId)
                 .orElseThrow(() -> new ResourceNotFoundException("Service not found with ID: " + serviceId));
 
+        if (!service.isActive()) {
+            throw new BadRequestException("Service '" + service.getName() + "' is currently inactive and cannot be booked");
+        }
+
         Address address = addressRepository.findById(addressId)
                 .orElseThrow(() -> new ResourceNotFoundException("Address not found with ID: " + addressId));
 
@@ -70,6 +74,9 @@ public class BookingService {
         if (providerId != null) {
             ProviderProfile provider = providerProfileRepository.findById(providerId)
                     .orElseThrow(() -> new ResourceNotFoundException("Provider not found with ID: " + providerId));
+            if (provider.getVerificationStatus() != com.trustfix.entity.VerificationStatus.VERIFIED) {
+                throw new BadRequestException("Selected provider is not verified to accept bookings");
+            }
             booking.setProvider(provider);
         }
 
@@ -77,11 +84,11 @@ public class BookingService {
         booking.setService(service);
         booking.setAddress(address);
 
-        if (booking.getTotalAmount() == null) {
+        if (booking.getTotalAmount() == null || !securityUtil.isAdmin()) {
             booking.setTotalAmount(service.getBasePrice());
         }
 
-        if (booking.getStatus() == null) {
+        if (booking.getStatus() == null || !securityUtil.isAdmin()) {
             booking.setStatus(BookingStatus.PENDING);
         }
 
@@ -110,7 +117,7 @@ public class BookingService {
         if (!userRepository.existsById(customerId)) {
             throw new ResourceNotFoundException("Customer not found with ID: " + customerId);
         }
-        return bookingRepository.findByCustomerId(customerId);
+        return bookingRepository.findByCustomerIdOrderByCreatedAtDesc(customerId);
     }
 
     @Transactional(readOnly = true)
@@ -131,6 +138,10 @@ public class BookingService {
     }
 
     public Booking updateBookingStatus(Long bookingId, BookingStatus newStatus) {
+        return updateBookingStatus(bookingId, newStatus, null);
+    }
+
+    public Booking updateBookingStatus(Long bookingId, BookingStatus newStatus, String cancellationReason) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking not found with ID: " + bookingId));
         securityUtil.verifyBookingAccessOrAdmin(booking);
@@ -151,6 +162,9 @@ public class BookingService {
             if (newStatus != BookingStatus.CANCELLED) {
                 throw new ForbiddenException("Customers are only permitted to cancel pending or confirmed bookings");
             }
+            if (currentStatus == BookingStatus.IN_PROGRESS) {
+                throw new ForbiddenException("Customers cannot cancel a booking that is already in progress");
+            }
         } else if (authenticatedUser.getRole() == UserRole.PROVIDER) {
             boolean isAssignedProvider = booking.getProvider() != null &&
                     booking.getProvider().getUser() != null &&
@@ -160,12 +174,23 @@ public class BookingService {
             }
         }
 
-        if (newStatus == BookingStatus.CANCELLED && booking.getCancellationReason() == null) {
-            booking.setCancellationReason("Cancelled by " + authenticatedUser.getRole().name().toLowerCase());
+        if (newStatus == BookingStatus.CANCELLED) {
+            if (cancellationReason != null && !cancellationReason.isBlank()) {
+                if (cancellationReason.trim().length() > 500) {
+                    throw new BadRequestException("Cancellation reason cannot exceed 500 characters");
+                }
+                booking.setCancellationReason(cancellationReason.trim());
+            } else if (booking.getCancellationReason() == null) {
+                booking.setCancellationReason("Cancelled by " + authenticatedUser.getRole().name().toLowerCase());
+            }
         }
 
         booking.setStatus(newStatus);
         return bookingRepository.save(booking);
+    }
+
+    public Booking cancelBooking(Long bookingId, String reason) {
+        return updateBookingStatus(bookingId, BookingStatus.CANCELLED, reason);
     }
 
     public Booking assignProvider(Long bookingId, Long providerId) {

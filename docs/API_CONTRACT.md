@@ -108,6 +108,12 @@ This document provides the authoritative API contract for the TrustFix Spring Bo
 ```
 - **Success Response** (`200 OK`): `UserResponse`
 
+### 2.3 Delete / Deactivate User
+- **Method**: `DELETE`
+- **Path**: `/api/users/{id}`
+- **Authentication**: `AUTHENTICATED (OWNER or ADMIN)`
+- **Success Response** (`204 No Content`): Empty response body. Non-admin self-deletion deactivates account (`active = false`), preserving referential integrity of booking/review history. Admins can permanently delete accounts with no dependents.
+
 ---
 
 ## 3. Provider Profile API (`/api/providers`)
@@ -306,6 +312,34 @@ This document provides the authoritative API contract for the TrustFix Spring Bo
   "updatedAt": "2026-08-28T01:00:00"
 }
 ```
+
+### 8.2 Update Booking Status
+- **Method**: `PUT`
+- **Path**: `/api/bookings/{id}/status?status={status}&reason={reason}`
+- **Authentication**: `AUTHENTICATED` (Assigned Provider, Customer for cancel, or Admin)
+- **Query Parameters**:
+  - `status` (`BookingStatus`, required): `CONFIRMED`, `IN_PROGRESS`, `COMPLETED`, `CANCELLED`
+  - `reason` (`String`, optional): Cancellation reason (max 500 characters)
+- **Success Response** (`200 OK`): `BookingResponse`
+
+### 8.3 Cancel Booking (Dedicated Endpoint)
+- **Method**: `PUT`
+- **Path**: `/api/bookings/{id}/cancel`
+- **Authentication**: `AUTHENTICATED (CUSTOMER, ASSIGNED PROVIDER, or ADMIN)`
+- **Request Body**:
+```json
+{
+  "reason": "Rescheduled to next week due to personal travel"
+}
+```
+- **Success Response** (`200 OK`): `BookingResponse` with `status: "CANCELLED"` and populated `cancellationReason`.
+- **Validation**: Enforces status must be `PENDING` or `CONFIRMED` to cancel. Rejects cancellation of `IN_PROGRESS` or `COMPLETED` bookings. Rejects cancellation reasons longer than 500 characters.
+
+### 8.4 Get Customer Bookings
+- **Method**: `GET`
+- **Path**: `/api/bookings/customer/{customerId}`
+- **Authentication**: `AUTHENTICATED (OWNER or ADMIN)`
+- **Success Response** (`200 OK`): Array of `BookingResponse`, sorted descending by creation date (`createdAt DESC`).
 
 ---
 

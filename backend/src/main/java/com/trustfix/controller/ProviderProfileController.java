@@ -98,7 +98,7 @@ public class ProviderProfileController {
     @PutMapping("/{id}")
     public ResponseEntity<ProviderProfileResponse> updateProviderProfile(
             @PathVariable Long id,
-            @RequestBody ProviderProfileRequest request) {
+            @Valid @RequestBody ProviderProfileRequest request) {
         ProviderProfile updatedDetails = providerProfileMapper.toEntity(request);
         ProviderProfile profile = providerProfileService.updateProviderProfile(id, updatedDetails);
         return ResponseEntity.ok(providerProfileMapper.toResponse(profile));

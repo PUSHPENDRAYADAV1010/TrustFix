@@ -602,6 +602,76 @@ Based on the audit, the recommended implementation order follows the user's phas
 
 ---
 
-## 15. Audit Conclusion & Sign-Off
+## 15. Phase 3 — Customer Features (Completed)
 
-> **Status:** Phase 2 Complete. All authentication and security hardening requirements verified. Awaiting instructions for Phase 3.
+### 15.1 Summary of Completed Tasks
+
+1. **Task 1 — Customer Self-Service Account Deletion / Deactivation:**
+   - Updated Spring Security configuration in `SecurityConfig.java`: loosened `DELETE /api/users/**` admin-only wildcard to allow `DELETE /api/users/{id}` for authenticated users, delegating granular authorization to `UserService`.
+   - In `UserService.deleteUser(Long id)`, enforced ownership verification via `securityUtil.verifyUserOwnershipOrAdmin(id)`.
+   - Prevented deactivation of already inactive accounts (`BadRequestException`).
+   - Implemented soft-deactivation (`user.setActive(false)`) for non-admin self-deletion or accounts with relational dependencies (existing bookings or reviews) to maintain database referential integrity and audit trails while immediately revoking login privileges in `AuthService.login()`.
+   - Added unit and security integration tests: `deleteUser_Admin_Success`, `deleteUser_CustomerSelfDeactivation_Success`, `deleteUser_CustomerAttemptsToDeleteOther_ThrowsForbiddenException`, `deleteUser_AlreadyInactive_ThrowsBadRequestException`, and `unauthenticatedDelete_Returns401`.
+
+2. **Task 2 — Booking Cancellation Reason Workflow:**
+   - Created `CancellationRequest` DTO with `@Size(max = 500, message = "Cancellation reason cannot exceed 500 characters")`.
+   - Added `cancellationReason` parameter handling to `BookingController.updateBookingStatus()` and created dedicated `PUT /api/bookings/{id}/cancel` endpoint accepting `@Valid @RequestBody CancellationRequest`.
+   - Enforced cancellation restrictions in `BookingService`: customers can only cancel bookings with status `PENDING` or `CONFIRMED`. Reject cancellation attempts when the booking is already `IN_PROGRESS` or `COMPLETED`.
+   - Preserved immutability: once cancelled, status and cancellation reason cannot be overridden.
+   - Handled whitespace trimming and character limits.
+
+3. **Task 3 — Missing `@Valid` on Update Endpoints:**
+   - Added missing `@Valid` annotations to all entity update endpoints:
+     - `UserController.updateUser(@PathVariable Long id, @Valid @RequestBody UserRequest request)`
+     - `AddressController.updateAddress(@PathVariable Long id, @Valid @RequestBody AddressRequest request)`
+     - `CategoryController.updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryRequest request)`
+     - `ServiceController.updateService(@PathVariable Long id, @Valid @RequestBody ServiceRequest request)`
+     - `ProviderProfileController.updateProviderProfile(@PathVariable Long id, @Valid @RequestBody ProviderProfileRequest request)`
+   - Added validation failure test `updateUser_InvalidEmail_Returns400` in `UserControllerTest`.
+
+4. **Task 4 — Customer Address Management & IDOR Enforcement:**
+   - Verified that customer addresses cannot be accessed, updated, or deleted by other users (`securityUtil.verifyUserOwnershipOrAdmin()`).
+   - In `BookingService.createBooking()`, enforced that the selected address must belong to the customer placing the booking (`address.getUser().getId().equals(customerId)`), preventing address IDOR injection.
+
+5. **Task 5 — Customer Booking Security Hardening:**
+   - Prevented price and status tampering: `BookingService.createBooking()` overrides any client-supplied total amount with the verified server-side service price (`service.getBasePrice()`) and forces initial status to `PENDING`.
+   - Validated that services must be active (`service.isActive()`) and providers must be verified (`provider.getVerificationStatus() == VerificationStatus.VERIFIED`), rejecting requests on inactive services or unverified providers with HTTP 400 Bad Request.
+
+6. **Task 6 — Service & Category Discovery Review:**
+   - Verified active service catalog endpoints (`GET /api/services/active` and `GET /api/categories`) operate securely and reliably for guest and customer browsing.
+
+7. **Task 7 — Customer Booking History Ordering:**
+   - Added `findByCustomerIdOrderByCreatedAtDesc(Long customerId)` to `BookingRepository`.
+   - Updated `BookingService.getBookingsByCustomerId()` to return bookings ordered by most recent first (`createdAt DESC`), ensuring optimal customer dashboard experience.
+
+8. **Task 8 — Sanitized Customer-Facing Error Handling:**
+   - Refactored `GlobalExceptionHandler.handleGenericException()`: replaced unhandled exception details with a generic, safe response message (`"An unexpected server error occurred. Please contact support."`) to eliminate stack trace and internal database leakage.
+   - Added SLF4J logger in `GlobalExceptionHandler` to record internal error details securely in backend logs.
+
+9. **Task 9 — Frontend Customer Portal Enhancements:**
+   - `frontend/src/services/userService.js`: Added `deleteAccount(userId)` and `changePassword(...)`. Removed silent mock fallbacks that previously masked API failures.
+   - `frontend/src/services/bookingService.js`: Added `cancelBooking(id, reason)` with real backend integration; removed silent mock fallback data.
+   - `CustomerProfilePage.jsx`: Added "Danger Zone: Deactivate Account" section with warning card and interactive confirmation modal that calls `userService.deleteAccount(user.id)`, signs the user out, and redirects to `/login`.
+   - `BookingDetailsPage.jsx`: Enhanced with a prominent cancellation alert banner displaying the booking's `cancellationReason` when cancelled.
+   - `MyBookingsPage.jsx`: Enhanced booking cards to display the cancellation reason badge when cancelled, allowing customers to easily review cancellation details.
+
+### 15.2 Verification & Test Results
+
+* **Backend Tests (`./mvnw.cmd test`):**
+  - Total tests run: **127**
+  - Passing: **127**
+  - Failures: **0**
+  - Errors: **0**
+  - Regressions: **None** (all 112 previous tests + 15 new tests passing)
+* **Frontend Build (`npm run build`):**
+  - Production build successful with Vite v6.4.3 (0 errors).
+* **End-to-End Verification (`test_e2e.ps1`):**
+  - All 7/7 core business flows verified passing and persisted in MySQL.
+  - Custom customer cancellation with reason flow verified end-to-end via REST API (`PUT /api/bookings/{id}/cancel`).
+
+---
+
+## 16. Audit Conclusion & Sign-Off
+
+> **Status:** Phase 3 Complete. All customer features, security validations, and frontend customer portal enhancements verified. Awaiting instructions for Phase 4.
+

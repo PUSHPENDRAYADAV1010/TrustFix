@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -184,7 +185,7 @@ class UserServiceTest {
     }
 
     @Test
-    void deleteUser_Success() {
+    void deleteUser_Admin_Success() {
         when(securityUtil.isAdmin()).thenReturn(true);
         when(userRepository.findById(1L)).thenReturn(Optional.of(rawUser));
 
@@ -194,10 +195,31 @@ class UserServiceTest {
     }
 
     @Test
-    void deleteUser_NonAdmin_ThrowsForbiddenException() {
+    void deleteUser_CustomerSelfDeactivation_Success() {
         when(securityUtil.isAdmin()).thenReturn(false);
+        rawUser.setActive(true);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(rawUser));
 
-        assertThrows(ForbiddenException.class, () -> userService.deleteUser(1L));
+        userService.deleteUser(1L);
+
+        assertFalse(rawUser.isActive());
+        verify(userRepository).save(rawUser);
+    }
+
+    @Test
+    void deleteUser_CustomerAttemptsToDeleteOther_ThrowsForbiddenException() {
+        org.mockito.Mockito.doThrow(new ForbiddenException("Unauthorized: You can only access or modify your own account resources"))
+                .when(securityUtil).verifyUserOwnershipOrAdmin(2L);
+
+        assertThrows(ForbiddenException.class, () -> userService.deleteUser(2L));
+    }
+
+    @Test
+    void deleteUser_AlreadyInactive_ThrowsBadRequestException() {
+        rawUser.setActive(false);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(rawUser));
+
+        assertThrows(com.trustfix.exception.BadRequestException.class, () -> userService.deleteUser(1L));
     }
 
     @Test
