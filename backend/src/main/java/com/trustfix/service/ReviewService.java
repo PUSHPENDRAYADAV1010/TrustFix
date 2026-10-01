@@ -90,7 +90,7 @@ public class ReviewService {
         if (!providerProfileRepository.existsById(providerId)) {
             throw new ResourceNotFoundException("Provider profile not found with ID: " + providerId);
         }
-        return reviewRepository.findByProviderIdOrderByCreatedAtDesc(providerId);
+        return reviewRepository.findByProviderIdAndHiddenFalseOrderByCreatedAtDesc(providerId);
     }
 
     @Transactional(readOnly = true)
@@ -99,12 +99,15 @@ public class ReviewService {
         return reviewRepository.findByCustomerIdOrderByCreatedAtDesc(customerId);
     }
 
-    private void updateProviderRatingStats(Long providerId) {
+    public void updateProviderRatingStats(Long providerId) {
         ProviderProfile provider = providerProfileRepository.findById(providerId).orElse(null);
         if (provider != null) {
             List<Review> providerReviews = reviewRepository.findByProviderId(providerId);
-            int count = providerReviews.size();
-            double average = providerReviews.stream()
+            List<Review> activeReviews = providerReviews.stream()
+                    .filter(r -> !r.isHidden())
+                    .toList();
+            int count = activeReviews.size();
+            double average = activeReviews.stream()
                     .mapToInt(Review::getRating)
                     .average()
                     .orElse(0.0);

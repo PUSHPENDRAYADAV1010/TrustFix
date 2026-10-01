@@ -13,6 +13,7 @@ import com.trustfix.exception.ResourceNotFoundException;
 import com.trustfix.repository.AddressRepository;
 import com.trustfix.repository.BookingRepository;
 import com.trustfix.repository.ProviderProfileRepository;
+import com.trustfix.repository.ProviderServiceRepository;
 import com.trustfix.repository.ServiceRepository;
 import com.trustfix.repository.UserRepository;
 import com.trustfix.security.SecurityUtil;
@@ -29,6 +30,7 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
     private final ProviderProfileRepository providerProfileRepository;
+    private final ProviderServiceRepository providerServiceRepository;
     private final ServiceRepository serviceRepository;
     private final AddressRepository addressRepository;
     private final SecurityUtil securityUtil;
@@ -36,12 +38,14 @@ public class BookingService {
     public BookingService(BookingRepository bookingRepository,
                           UserRepository userRepository,
                           ProviderProfileRepository providerProfileRepository,
+                          ProviderServiceRepository providerServiceRepository,
                           ServiceRepository serviceRepository,
                           AddressRepository addressRepository,
                           SecurityUtil securityUtil) {
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
         this.providerProfileRepository = providerProfileRepository;
+        this.providerServiceRepository = providerServiceRepository;
         this.serviceRepository = serviceRepository;
         this.addressRepository = addressRepository;
         this.securityUtil = securityUtil;
@@ -212,8 +216,26 @@ public class BookingService {
         }
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking not found with ID: " + bookingId));
+
+        if (booking.getStatus() == BookingStatus.COMPLETED || booking.getStatus() == BookingStatus.CANCELLED) {
+            throw new BadRequestException("Cannot assign provider to a booking that is already " + booking.getStatus());
+        }
+
         ProviderProfile provider = providerProfileRepository.findById(providerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Provider profile not found with ID: " + providerId));
+
+        if (provider.getVerificationStatus() != com.trustfix.entity.VerificationStatus.VERIFIED) {
+            throw new BadRequestException("Selected provider is not verified to accept bookings");
+        }
+
+        if (provider.getUser() != null && !provider.getUser().isActive()) {
+            throw new BadRequestException("Selected provider account is currently deactivated");
+        }
+
+        boolean offersService = providerServiceRepository.existsByProviderIdAndServiceId(providerId, booking.getService().getId());
+        if (!offersService) {
+            throw new BadRequestException("Provider does not offer the service: " + booking.getService().getName());
+        }
 
         booking.setProvider(provider);
         if (booking.getStatus() == BookingStatus.PENDING) {

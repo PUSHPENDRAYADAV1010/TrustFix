@@ -15,6 +15,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
 
@@ -49,6 +50,13 @@ public class Review {
 
     @Column(columnDefinition = "TEXT")
     private String comment;
+
+    @Column(name = "is_hidden", nullable = false)
+    private boolean hidden = false;
+
+    @Size(max = 500, message = "Moderation reason cannot exceed 500 characters")
+    @Column(name = "moderation_reason", length = 500)
+    private String moderationReason;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -142,5 +150,21 @@ public class Review {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public boolean isHidden() {
+        return hidden;
+    }
+
+    public void setHidden(boolean hidden) {
+        this.hidden = hidden;
+    }
+
+    public String getModerationReason() {
+        return moderationReason;
+    }
+
+    public void setModerationReason(String moderationReason) {
+        this.moderationReason = moderationReason;
     }
 }

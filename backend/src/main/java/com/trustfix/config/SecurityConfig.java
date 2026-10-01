@@ -163,6 +163,7 @@ public class SecurityConfig {
                     "/api/provider-services/service/**",
                     "/api/reviews/provider/**"
                 ).permitAll()
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/users/role/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/users").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/users").hasRole("ADMIN")

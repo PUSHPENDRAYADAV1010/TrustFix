@@ -22,6 +22,13 @@ public class CategoryService {
     }
 
     public Category createCategory(Category category) {
+        if (category == null || category.getName() == null || category.getName().trim().isBlank()) {
+            throw new com.trustfix.exception.BadRequestException("Category name is required and cannot be blank");
+        }
+        category.setName(category.getName().trim());
+        if (category.getDescription() != null) {
+            category.setDescription(category.getDescription().trim());
+        }
         if (categoryRepository.existsByName(category.getName())) {
             throw new ResourceAlreadyExistsException("Category with name '" + category.getName() + "' already exists");
         }
@@ -40,6 +47,14 @@ public class CategoryService {
     }
 
     @Transactional(readOnly = true)
+    public List<Category> searchCategories(String query) {
+        if (query == null || query.trim().isBlank()) {
+            return categoryRepository.findAll();
+        }
+        return categoryRepository.findByNameContainingIgnoreCase(query.trim());
+    }
+
+    @Transactional(readOnly = true)
     public List<Category> getActiveCategories() {
         return categoryRepository.findByActiveTrue();
     }
@@ -52,11 +67,17 @@ public class CategoryService {
     public Category updateCategory(Long id, Category updatedCategory) {
         Category existingCategory = getCategoryById(id);
 
-        if (updatedCategory.getName() != null && !updatedCategory.getName().equals(existingCategory.getName())) {
-            if (categoryRepository.existsByName(updatedCategory.getName())) {
-                throw new ResourceAlreadyExistsException("Category with name '" + updatedCategory.getName() + "' already exists");
+        if (updatedCategory.getName() != null) {
+            String trimmedName = updatedCategory.getName().trim();
+            if (trimmedName.isBlank()) {
+                throw new com.trustfix.exception.BadRequestException("Category name cannot be blank");
             }
-            existingCategory.setName(updatedCategory.getName());
+            if (!trimmedName.equalsIgnoreCase(existingCategory.getName())) {
+                if (categoryRepository.existsByName(trimmedName)) {
+                    throw new ResourceAlreadyExistsException("Category with name '" + trimmedName + "' already exists");
+                }
+            }
+            existingCategory.setName(trimmedName);
         }
         if (updatedCategory.getDescription() != null) {
             existingCategory.setDescription(updatedCategory.getDescription());

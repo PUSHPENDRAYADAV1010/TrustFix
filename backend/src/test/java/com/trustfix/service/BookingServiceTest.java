@@ -14,6 +14,7 @@ import com.trustfix.exception.ForbiddenException;
 import com.trustfix.repository.AddressRepository;
 import com.trustfix.repository.BookingRepository;
 import com.trustfix.repository.ProviderProfileRepository;
+import com.trustfix.repository.ProviderServiceRepository;
 import com.trustfix.repository.ServiceRepository;
 import com.trustfix.repository.UserRepository;
 import com.trustfix.security.SecurityUtil;
@@ -49,6 +50,9 @@ class BookingServiceTest {
 
     @Mock
     private ProviderProfileRepository providerProfileRepository;
+
+    @Mock
+    private ProviderServiceRepository providerServiceRepository;
 
     @Mock
     private ServiceRepository serviceRepository;

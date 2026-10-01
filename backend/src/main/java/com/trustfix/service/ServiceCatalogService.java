@@ -23,8 +23,24 @@ public class ServiceCatalogService {
     }
 
     public Service createService(Long categoryId, Service service) {
+        if (service == null || service.getName() == null || service.getName().trim().isBlank()) {
+            throw new com.trustfix.exception.BadRequestException("Service name is required and cannot be blank");
+        }
+        service.setName(service.getName().trim());
+        if (service.getBasePrice() == null || service.getBasePrice().compareTo(java.math.BigDecimal.ZERO) < 0) {
+            throw new com.trustfix.exception.BadRequestException("Base price must be greater than or equal to 0");
+        }
+        if (service.getDurationInMinutes() != null && service.getDurationInMinutes() <= 0) {
+            throw new com.trustfix.exception.BadRequestException("Duration must be greater than 0 minutes");
+        }
+
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with ID: " + categoryId));
+
+        if (service.isActive() && !category.isActive()) {
+            throw new com.trustfix.exception.BadRequestException("Cannot create an active service in an inactive category");
+        }
+
         service.setCategory(category);
         return serviceRepository.save(service);
     }
@@ -44,6 +60,14 @@ public class ServiceCatalogService {
     }
 
     @Transactional(readOnly = true)
+    public List<Service> searchServices(String query) {
+        if (query == null || query.trim().isBlank()) {
+            return serviceRepository.findAll();
+        }
+        return serviceRepository.findByNameContainingIgnoreCase(query.trim());
+    }
+
+    @Transactional(readOnly = true)
     public List<Service> getActiveServices() {
         return serviceRepository.findByActiveTrue();
     }
@@ -56,20 +80,39 @@ public class ServiceCatalogService {
     public Service updateService(Long id, Service updatedService) {
         Service existingService = getServiceById(id);
 
-        if (updatedService.getName() != null && !updatedService.getName().isBlank()) {
-            existingService.setName(updatedService.getName());
+        if (updatedService.getName() != null) {
+            String trimmedName = updatedService.getName().trim();
+            if (trimmedName.isBlank()) {
+                throw new com.trustfix.exception.BadRequestException("Service name cannot be blank");
+            }
+            existingService.setName(trimmedName);
         }
         if (updatedService.getDescription() != null) {
             existingService.setDescription(updatedService.getDescription());
         }
         if (updatedService.getBasePrice() != null) {
+            if (updatedService.getBasePrice().compareTo(java.math.BigDecimal.ZERO) < 0) {
+                throw new com.trustfix.exception.BadRequestException("Base price must be greater than or equal to 0");
+            }
             existingService.setBasePrice(updatedService.getBasePrice());
         }
         if (updatedService.getDurationInMinutes() != null) {
+            if (updatedService.getDurationInMinutes() <= 0) {
+                throw new com.trustfix.exception.BadRequestException("Duration must be greater than 0 minutes");
+            }
             existingService.setDurationInMinutes(updatedService.getDurationInMinutes());
         }
         if (updatedService.getImageUrl() != null) {
             existingService.setImageUrl(updatedService.getImageUrl());
+        }
+        if (updatedService.getCategory() != null && updatedService.getCategory().getId() != null) {
+            Long newCategoryId = updatedService.getCategory().getId();
+            Category newCategory = categoryRepository.findById(newCategoryId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Category not found with ID: " + newCategoryId));
+            if (updatedService.isActive() && !newCategory.isActive()) {
+                throw new com.trustfix.exception.BadRequestException("Cannot assign service to an inactive category while service is active");
+            }
+            existingService.setCategory(newCategory);
         }
         existingService.setActive(updatedService.isActive());
 
