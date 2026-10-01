@@ -69,6 +69,14 @@ public class UserController {
         return ResponseEntity.ok(userMapper.toResponse(updatedUser));
     }
 
+    @PutMapping("/{id}/password")
+    public ResponseEntity<java.util.Map<String, String>> changePassword(
+            @PathVariable Long id,
+            @jakarta.validation.Valid @RequestBody com.trustfix.dto.user.ChangePasswordRequest request) {
+        userService.changePassword(id, request.getCurrentPassword(), request.getNewPassword());
+        return ResponseEntity.ok(java.util.Map.of("message", "Password updated successfully"));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);

@@ -128,6 +128,62 @@ class UserServiceTest {
     }
 
     @Test
+    void updateUser_NoPasswordProvided_PreservesExistingPasswordHash() {
+        doNothing().when(securityUtil).verifyUserOwnershipOrAdmin(1L);
+        when(securityUtil.isAdmin()).thenReturn(true);
+        rawUser.setPassword("existingHashedSecret");
+        when(userRepository.findById(1L)).thenReturn(Optional.of(rawUser));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        User updateDetails = new User();
+        updateDetails.setName("New Name Only");
+        updateDetails.setPassword(null);
+
+        User updatedUser = userService.updateUser(1L, updateDetails);
+
+        assertEquals("existingHashedSecret", updatedUser.getPassword(), "Existing password hash must be preserved");
+        assertEquals("New Name Only", updatedUser.getName());
+    }
+
+    @Test
+    void updateUser_BlankPassword_PreservesExistingPasswordHash() {
+        doNothing().when(securityUtil).verifyUserOwnershipOrAdmin(1L);
+        when(securityUtil.isAdmin()).thenReturn(true);
+        rawUser.setPassword("existingHashedSecret");
+        when(userRepository.findById(1L)).thenReturn(Optional.of(rawUser));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        User updateDetails = new User();
+        updateDetails.setPassword("   ");
+
+        User updatedUser = userService.updateUser(1L, updateDetails);
+
+        assertEquals("existingHashedSecret", updatedUser.getPassword(), "Blank password must not overwrite existing hash");
+    }
+
+    @Test
+    void changePassword_Success_UpdatesHashedPassword() {
+        doNothing().when(securityUtil).verifyUserOwnershipOrAdmin(1L);
+        rawUser.setPassword(passwordEncoder.encode("OldPassword123!"));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(rawUser));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        userService.changePassword(1L, "OldPassword123!", "NewStrongPass456!");
+
+        assertTrue(passwordEncoder.matches("NewStrongPass456!", rawUser.getPassword()));
+    }
+
+    @Test
+    void changePassword_WrongCurrentPassword_ThrowsBadRequestException() {
+        doNothing().when(securityUtil).verifyUserOwnershipOrAdmin(1L);
+        rawUser.setPassword(passwordEncoder.encode("OldPassword123!"));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(rawUser));
+
+        assertThrows(com.trustfix.exception.BadRequestException.class,
+                () -> userService.changePassword(1L, "IncorrectOldPassword!", "NewStrongPass456!"));
+    }
+
+    @Test
     void deleteUser_Success() {
         when(securityUtil.isAdmin()).thenReturn(true);
         when(userRepository.findById(1L)).thenReturn(Optional.of(rawUser));

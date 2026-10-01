@@ -40,7 +40,7 @@ APP_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
 Set the API base URL in `frontend/.env`:
 
 ```env
-VITE_API_BASE_URL=http://localhost:8080/api
+VITE_API_BASE_URL=http://localhost:8085/api
 VITE_APP_NAME=TrustFix
 VITE_APP_TAGLINE=Verified Home Service Platform
 ```
@@ -63,8 +63,8 @@ cd backend
 mvn spring-boot:run
 new 
 ```
-The backend server runs on `http://localhost:8080`.
-Verify backend health: `http://localhost:8080/actuator/health`
+The backend server runs on `http://localhost:8085`.
+Verify backend health: `http://localhost:8085/actuator/health`
 
 ### 3. Frontend Startup
 

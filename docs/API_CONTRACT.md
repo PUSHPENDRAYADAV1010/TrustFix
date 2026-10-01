@@ -1,6 +1,6 @@
 # TrustFix Backend — Complete REST API Contract Specification
 
-This document provides the authoritative API contract for the TrustFix Spring Boot Backend (`http://localhost:8080`). All request and response structures are mapped directly to verified DTOs.
+This document provides the authoritative API contract for the TrustFix Spring Boot Backend (`http://localhost:8085`). All request and response structures are mapped directly to verified DTOs.
 
 ---
 

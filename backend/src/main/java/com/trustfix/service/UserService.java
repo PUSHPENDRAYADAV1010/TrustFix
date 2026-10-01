@@ -2,6 +2,7 @@ package com.trustfix.service;
 
 import com.trustfix.entity.User;
 import com.trustfix.entity.UserRole;
+import com.trustfix.exception.BadRequestException;
 import com.trustfix.exception.ForbiddenException;
 import com.trustfix.exception.ResourceAlreadyExistsException;
 import com.trustfix.exception.ResourceNotFoundException;
@@ -92,11 +93,7 @@ public class UserService {
         }
         if (updatedDetails.getPassword() != null && !updatedDetails.getPassword().isBlank()) {
             if (!updatedDetails.getPassword().equals(existingUser.getPassword())) {
-                if (!isBCryptHashed(updatedDetails.getPassword())) {
-                    existingUser.setPassword(passwordEncoder.encode(updatedDetails.getPassword()));
-                } else {
-                    existingUser.setPassword(updatedDetails.getPassword());
-                }
+                existingUser.setPassword(passwordEncoder.encode(updatedDetails.getPassword()));
             }
         }
         if (updatedDetails.getPhone() != null && !updatedDetails.getPhone().equals(existingUser.getPhone())) {
@@ -115,6 +112,20 @@ public class UserService {
         return userRepository.save(existingUser);
     }
 
+    public void changePassword(Long userId, String currentPassword, String newPassword) {
+        securityUtil.verifyUserOwnershipOrAdmin(userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
+
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new BadRequestException("Current password does not match");
+        }
+
+        com.trustfix.util.PasswordValidator.validate(newPassword);
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
     public void deleteUser(Long id) {
         if (!securityUtil.isAdmin()) {
             throw new ForbiddenException("Only administrators can delete user accounts");
@@ -122,12 +133,5 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + id));
         userRepository.delete(user);
-    }
-
-    private boolean isBCryptHashed(String password) {
-        if (password == null) {
-            return false;
-        }
-        return (password.startsWith("$2a$") || password.startsWith("$2b$") || password.startsWith("$2y$")) && password.length() == 60;
     }
 }

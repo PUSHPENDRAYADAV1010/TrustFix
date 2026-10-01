@@ -4,13 +4,13 @@ import { Sidebar } from '../components/dashboard/Sidebar';
 
 export const AdminLayout = () => {
   return (
-    <div className="dashboard-layout">
+    <div className="Dashboard-Layout">
       <div
-        className="sidebar-backdrop"
-        onClick={() => document.querySelector('.dashboard-layout')?.classList.remove('sidebar-open')}
+        className="Sidebar-Backdrop"
+        onClick={() => document.querySelector('.Dashboard-Layout')?.classList.remove('Sidebar-Open')}
       />
       <Sidebar role="ADMIN" />
-      <div className="dashboard-main">
+      <div className="Dashboard-Main">
         <Outlet />
       </div>
     </div>
