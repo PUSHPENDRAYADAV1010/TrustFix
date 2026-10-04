@@ -47,33 +47,45 @@ VITE_APP_TAGLINE=Verified Home Service Platform
 
 ---
 
-## 🚀 Development Setup & Local Run
+## 🚀 Quick Start (Frontend & Backend Connected)
 
-### 1. MySQL Setup
+### 1. Start the Backend API (Spring Boot)
 
-Create the MySQL database:
-```sql
-CREATE DATABASE trustfix CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
-
-### 2. Backend Startup
+The backend starts out of the box with embedded persistent storage (H2 in MySQL mode) and seeds categories, services, and 12+ verified providers:
 
 ```bash
 cd backend
-mvn spring-boot:run
-new 
+./mvnw spring-boot:run
 ```
-The backend server runs on `http://localhost:8085`.
-Verify backend health: `http://localhost:8085/actuator/health`
 
-### 3. Frontend Startup
+- **API Base URL**: `http://localhost:8085/api`
+- **Health Check**: `http://localhost:8085/actuator/health`
+- **H2 Database Console**: `http://localhost:8085/h2-console` *(JDBC URL: `jdbc:h2:file:./data/trustfixdb`)*
+
+*(Optional: To connect to an external MySQL server, set `DB_URL=jdbc:mysql://localhost:3306/trustfix` in `backend/.env`)*
+
+### 2. Start the Frontend App (React + Vite)
 
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-The frontend dev server runs on `http://localhost:3000` or `http://localhost:5173`.
+
+- **Frontend Web App**: [http://localhost:3000](http://localhost:3000)
+- **Browse Providers**: [http://localhost:3000/providers](http://localhost:3000/providers)
+
+---
+
+## 🔑 Pre-Seeded Test Credentials
+
+| Role | Email | Password | Permissions & Features |
+| :--- | :--- | :--- | :--- |
+| 🛡️ **Admin** | `admin@trustfix.com` | `Admin@123` | Admin Dashboard, user verification, service management |
+| 👤 **Customer** | `testcustomer@gmail.com` | `Test@123` | Booking services, real-time tracking, review submission |
+| 🔧 **Provider** | `testprovider@gmail.com` | `Test@123` | Provider Dashboard, job updates, availability toggle |
+| ⚡ **Electrician Pro** | `rajesh.kumar@trustfix.com` | `Test@123` | Kumar Electricals verified provider account |
+| 🚰 **Plumbing Pro** | `vikram.jadhav@trustfix.com` | `Test@123` | Jadhav Quick Plumbing verified provider account |
 
 ---
 
@@ -82,33 +94,26 @@ The frontend dev server runs on `http://localhost:3000` or `http://localhost:517
 ### Backend Production Build
 ```bash
 cd backend
-mvn clean package -DskipTests
+./mvnw clean package -DskipTests
 ```
-Generates the executable JAR at `backend/target/trustfix-backend-0.0.1-SNAPSHOT.jar`. Run with:
+Generates executable JAR at `backend/target/trustfix-backend-0.0.1-SNAPSHOT.jar`. Run with:
 ```bash
 java -jar backend/target/trustfix-backend-0.0.1-SNAPSHOT.jar
 ```
 
 ### Frontend Production Build
 ```bash
-cd frontend and 
+cd frontend
 npm run build
 ```
-Generates static production assets in `frontend/dist/`.
+Generates optimized static production assets in `frontend/dist/`.
 
 ---
 
 ## 🔐 Security & Hardening Features
 
-1. **Role-Based Authorization & IDOR Protection**: Backend ownership validation (`SecurityUtil.java`) enforces that customers can only view/modify their own accounts, addresses, and bookings. Cross-account access attempts return `403 Forbidden`.
-2. **Booking Lifecycle & Past-Date Guard**: Status transitions are restricted to valid paths (`PENDING -> CONFIRMED -> IN_PROGRESS -> COMPLETED/CANCELLED`). Booking appointments in the past returns `400 Bad Request`.
-3. **Stateless JWT Sessions**: Tokens are signed with HS256/512 algorithms. Missing or expired tokens return `401/403`.
-4. **CORS Hardening**: Explicitly origin-restricted. Wildcard origins (`*`) with credentials disabled.
-5. **No Password/Token Leakage**: Passwords hashed with BCrypt. Sensitive keys excluded from console logs and Git.
-
----
-
-## 🧑‍💻 Default Accounts
-
-- **Admin**: `admin@trustfix.com` / `231182157800100950` (or `pushpendraydv1010@gmail.com` / `231182157800100950`)
-- **Customer & Provider**: Register new verified accounts via the `/register` page.
+1. **Role-Based Authorization & IDOR Protection**: Backend ownership validation (`SecurityUtil.java`) enforces that customers can only view/modify their own accounts, addresses, and bookings.
+2. **Booking Lifecycle Guard**: Validated status transitions (`PENDING -> CONFIRMED -> IN_PROGRESS -> COMPLETED/CANCELLED`). Past-date bookings rejected.
+3. **Stateless JWT Sessions**: Tokens signed with HS256/512 algorithms.
+4. **CORS Hardening**: Origin-restricted to `http://localhost:3000` with credential support.
+5. **No Password/Token Leakage**: Passwords hashed with BCrypt, sensitive tokens excluded from logs.

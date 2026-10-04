@@ -104,7 +104,7 @@ npm install
 
 ```bash
 npm run dev
-# Frontend will start at http://localhost:3000 or http://localhost:5173
+# Frontend will start at http://localhost:3000
 ```
 
 #### 4. Production Build
