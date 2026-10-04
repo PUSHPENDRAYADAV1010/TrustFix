@@ -105,28 +105,33 @@ export const resolveCategoryImage = (categoryName = '') => {
   return CATEGORY_IMAGES[key] || CATEGORY_IMAGES[categoryName.toLowerCase()] || 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=600&auto=format&fit=crop&q=80';
 };
 
-// Stable distinct provider avatars (100% Unique per professional profile)
+// Stable distinct provider avatars (100% Real, candid, professional portrait photographs)
 const PROVIDER_AVATARS = [
-  'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=240&auto=format&fit=crop&q=80', // Rajesh Kumar (Electrician)
-  'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=240&auto=format&fit=crop&q=80', // Priya Sharma (Plumber)
-  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=240&auto=format&fit=crop&q=80', // Amit Verma (AC tech)
-  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=240&auto=format&fit=crop&q=80', // Vikram Singh (Cleaning)
-  'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=240&auto=format&fit=crop&q=80', // Anand Verma (Technician)
-  'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=240&auto=format&fit=crop&q=80', // Sunita Rao (Specialist)
-  'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=240&auto=format&fit=crop&q=80', // Rahul Deshmukh (Carpenter)
+  'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=320&auto=format&fit=crop&q=80', // 1. Rajesh Kumar (Electrician)
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=320&auto=format&fit=crop&q=80', // 2. Vikram Jadhav (Plumber)
+  'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=320&auto=format&fit=crop&q=80', // 3. Sunita Deshmukh (Cleaning Supervisor)
+  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=320&auto=format&fit=crop&q=80', // 4. Mohammad Farooqui (AC HVAC)
+  'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=320&auto=format&fit=crop&q=80', // 5. Ramesh Sharma (Appliance Technician)
+  'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=320&auto=format&fit=crop&q=80', // 6. Amit Mistri (Carpentry Craftsman)
+  'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=320&auto=format&fit=crop&q=80', // 7. Anand Verma (Painter)
+  'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=320&auto=format&fit=crop&q=80', // 8. Pooja Salvi (Cleaning Specialist)
+  'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=320&auto=format&fit=crop&q=80', // 9. Sanjay Kulkarni (Senior Electrician)
+  'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=320&auto=format&fit=crop&q=80', // 10. Manoj Tiwari (HVAC Technician)
+  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=320&auto=format&fit=crop&q=80', // 11. Ganesh Patil (Plumbing Master)
+  'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=320&auto=format&fit=crop&q=80', // 12. Deepak Chauhan (Appliance Repair)
 ];
 
 // Distinct Customer / User Avatars
 const CUSTOMER_AVATARS = [
-  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&auto=format&fit=crop&q=80', // Neha
-  'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=120&auto=format&fit=crop&q=80', // Rohan
-  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80', // Ananya
-  'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=120&auto=format&fit=crop&q=80', // Karan
-  'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=120&auto=format&fit=crop&q=80', // Pooja
+  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=160&auto=format&fit=crop&q=80', // Neha
+  'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=160&auto=format&fit=crop&q=80', // Rohan
+  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80', // Ananya
+  'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=160&auto=format&fit=crop&q=80', // Karan
+  'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=160&auto=format&fit=crop&q=80', // Pooja
 ];
 
 /**
- * Resolves a distinct, professional avatar for each provider
+ * Resolves a distinct, authentic real portrait avatar for each provider
  */
 export const resolveProviderAvatar = (provider = {}) => {
   if (provider.avatarUrl && provider.avatarUrl.startsWith('http')) {
@@ -138,12 +143,17 @@ export const resolveProviderAvatar = (provider = {}) => {
 
   const name = (provider.name || provider.userName || provider.businessName || '').toLowerCase();
   if (name.includes('rajesh')) return PROVIDER_AVATARS[0];
-  if (name.includes('priya')) return PROVIDER_AVATARS[1];
-  if (name.includes('amit')) return PROVIDER_AVATARS[2];
-  if (name.includes('vikram')) return PROVIDER_AVATARS[3];
-  if (name.includes('anand')) return PROVIDER_AVATARS[4];
-  if (name.includes('sunita')) return PROVIDER_AVATARS[5];
-  if (name.includes('rahul')) return PROVIDER_AVATARS[6];
+  if (name.includes('jadhav') || name.includes('vikram')) return PROVIDER_AVATARS[1];
+  if (name.includes('sunita') || name.includes('sparkle')) return PROVIDER_AVATARS[2];
+  if (name.includes('farooqui') || name.includes('coolair')) return PROVIDER_AVATARS[3];
+  if (name.includes('sharma') || name.includes('ramesh')) return PROVIDER_AVATARS[4];
+  if (name.includes('mistri') || name.includes('amit')) return PROVIDER_AVATARS[5];
+  if (name.includes('verma') || name.includes('anand')) return PROVIDER_AVATARS[6];
+  if (name.includes('pooja') || name.includes('salvi') || name.includes('elite')) return PROVIDER_AVATARS[7];
+  if (name.includes('sanjay') || name.includes('kulkarni')) return PROVIDER_AVATARS[8];
+  if (name.includes('manoj') || name.includes('tiwari')) return PROVIDER_AVATARS[9];
+  if (name.includes('ganesh') || name.includes('patil')) return PROVIDER_AVATARS[10];
+  if (name.includes('deepak') || name.includes('chauhan')) return PROVIDER_AVATARS[11];
 
   const id = Number(provider.id || provider.userId || 0);
   const index = Math.abs(id % PROVIDER_AVATARS.length);

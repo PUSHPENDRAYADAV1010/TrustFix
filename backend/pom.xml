@@ -70,6 +70,13 @@
     <scope>runtime</scope>
 </dependency>	
 
+		<!-- H2 Database for seamless standalone local execution -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
 		<!-- MySQL Driver -->
 		<dependency>
 			<groupId>com.mysql</groupId>

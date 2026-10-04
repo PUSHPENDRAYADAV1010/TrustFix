@@ -118,6 +118,7 @@ public class SecurityConfig {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
+            .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
 
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -151,6 +152,7 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/api/auth/**",
                     "/actuator/health",
+                    "/h2-console/**",
                     "/error"
                 ).permitAll()
                 .requestMatchers(HttpMethod.GET,

@@ -14,6 +14,12 @@ frontend/dist/
 .vscode/
 .idea/
 
+# Database & runtime files
+backend/data/
+data/
+*.mv.db
+*.trace.db
+
 # OS
 .DS_Store
 Thumbs.db
